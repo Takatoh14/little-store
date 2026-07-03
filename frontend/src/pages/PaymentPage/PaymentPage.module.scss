@@ -1,0 +1,55 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.section {
+  @include page-section;
+  max-width: 480px;
+}
+
+.title {
+  font-size: 1.4rem;
+  margin-bottom: $space-5;
+}
+
+.summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $space-4;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-card;
+  margin-bottom: $space-6;
+}
+
+.totalLabel {
+  font-weight: 600;
+}
+
+.totalPrice {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: $color-accent;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.cardFieldWrapper {
+  padding: $space-4;
+  border: 1px solid $color-border;
+  border-radius: $radius-input;
+  margin-bottom: $space-4;
+}
+
+.cardError {
+  color: $color-danger;
+  font-size: 0.85rem;
+  margin-top: $space-2;
+}
+
+.banner {
+  @include banner-error;
+}

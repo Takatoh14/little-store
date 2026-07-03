@@ -1,0 +1,11 @@
+@use "../../styles/tokens" as *;
+
+.wrapper {
+  padding: $space-6 $space-4;
+  text-align: center;
+  color: $color-text-muted;
+}
+
+.error {
+  color: $color-danger;
+}

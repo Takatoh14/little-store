@@ -1,0 +1,14 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.main {
+  flex: 1;
+}
+
+.footer {
+  background: $color-ink;
+  color: #fff;
+  text-align: center;
+  padding: $space-5 $space-4;
+  font-size: 0.85rem;
+}

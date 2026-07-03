@@ -1,0 +1,50 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.section {
+  @include page-section;
+  max-width: 560px;
+  text-align: center;
+}
+
+.icon {
+  font-size: 2.5rem;
+  color: $color-success;
+  margin-bottom: $space-4;
+}
+
+.title {
+  font-size: 1.4rem;
+  margin-bottom: $space-3;
+}
+
+.lead {
+  color: $color-text-muted;
+  margin-bottom: $space-6;
+}
+
+.detail {
+  text-align: left;
+  padding: $space-4;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-card;
+  margin-bottom: $space-6;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  padding: $space-2 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.itemsTitle {
+  font-weight: 600;
+  margin: $space-3 0 $space-2;
+}

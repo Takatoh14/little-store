@@ -1,0 +1,85 @@
+@use "tokens" as *;
+
+@mixin pc {
+  @media (min-width: $bp-pc) {
+    @content;
+  }
+}
+
+@mixin button-reset {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+@mixin container {
+  width: 100%;
+  max-width: $max-content-width;
+  margin: 0 auto;
+  padding: 0 $space-4;
+
+  @include pc {
+    padding: 0 $space-6;
+  }
+}
+
+@mixin line-clamp($lines) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@mixin form-field {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin-bottom: $space-4;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  input,
+  textarea {
+    padding: $space-3;
+    border: 1px solid $color-border;
+    border-radius: $radius-input;
+    font-size: 1rem;
+
+    &:focus {
+      outline: 2px solid $color-accent;
+      outline-offset: -1px;
+    }
+  }
+
+  .fieldError {
+    color: $color-danger;
+    font-size: 0.8rem;
+  }
+}
+
+@mixin page-section {
+  @include container;
+  padding-top: $space-6;
+  padding-bottom: $space-8;
+}
+
+@mixin narrow-form-page {
+  @include page-section;
+  max-width: 440px;
+}
+
+@mixin banner-error {
+  padding: $space-3 $space-4;
+  border-radius: $radius-input;
+  background: rgba($color-danger, 0.08);
+  color: $color-danger;
+  font-size: 0.9rem;
+  margin-bottom: $space-4;
+}

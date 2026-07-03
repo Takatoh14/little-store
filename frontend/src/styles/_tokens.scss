@@ -1,0 +1,37 @@
+// デザイントークン
+// document/EC_ワイヤーフレーム_追加.pdf の配色を参考にしたベストエフォート値（Figma不在のため）
+
+$color-accent: #c0392b; // 見出し・リンク・価格強調（赤茶）
+$color-accent-dark: #a53125; // accentのhover/active
+
+$color-ink: #2f221c; // ボタン・濃色面（こげ茶）
+$color-header-bg: #eee8df; // ヘッダー背景（クリーム）
+
+$color-bg: #ffffff;
+$color-surface: #faf8f5; // カード背景など
+$color-border: #e0d9cd;
+
+$color-text: #33291f;
+$color-text-muted: #7a6f62;
+
+$color-danger: #b3261e; // accentと区別するエラー色
+$color-success: #2e7d32;
+
+$space-1: 4px;
+$space-2: 8px;
+$space-3: 12px;
+$space-4: 16px;
+$space-5: 24px;
+$space-6: 32px;
+$space-7: 48px;
+$space-8: 64px;
+
+$font-family-base: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+
+// モバイルファースト。この幅以上でPCレイアウトに切り替える
+$bp-pc: 1200px;
+
+$radius-card: 8px;
+$radius-input: 4px;
+
+$max-content-width: 1200px;

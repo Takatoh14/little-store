@@ -1,0 +1,45 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.button {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: $space-3 $space-5;
+  border-radius: $radius-input;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: opacity 0.15s ease;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.primary {
+  background: $color-ink;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+}
+
+.secondary {
+  background: transparent;
+  border: 1px solid $color-border;
+  color: $color-text;
+
+  &:hover:not(:disabled) {
+    border-color: $color-accent;
+  }
+}
+
+.danger {
+  background: transparent;
+  color: $color-danger;
+  text-decoration: underline;
+}

@@ -1,0 +1,84 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.section {
+  @include page-section;
+}
+
+.title {
+  font-size: 1.4rem;
+  margin-bottom: $space-5;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  margin-bottom: $space-6;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+  padding: $space-4;
+  border: 1px solid $color-border;
+  border-radius: $radius-card;
+  background: $color-surface;
+}
+
+.itemInfo {
+  flex: 1;
+}
+
+.itemName {
+  font-weight: 600;
+  margin-bottom: $space-1;
+}
+
+.itemPrice {
+  color: $color-text-muted;
+  font-size: 0.9rem;
+}
+
+.itemSubtotal {
+  font-weight: 700;
+  min-width: 80px;
+  text-align: right;
+}
+
+.removeButton {
+  @include button-reset;
+  color: $color-danger;
+  font-size: 0.85rem;
+  text-decoration: underline;
+}
+
+.summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $space-4;
+  border-top: 2px solid $color-ink;
+  margin-bottom: $space-5;
+}
+
+.totalLabel {
+  font-weight: 600;
+}
+
+.totalPrice {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: $color-accent;
+}
+
+.checkoutButton {
+  max-width: 320px;
+  margin-left: auto;
+}
+
+.itemError {
+  color: $color-danger;
+  font-size: 0.8rem;
+}

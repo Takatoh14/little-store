@@ -1,0 +1,23 @@
+@use "tokens" as *;
+@use "reset";
+
+body {
+  font-family: $font-family-base;
+  color: $color-text;
+  background: $color-bg;
+}
+
+a {
+  color: $color-accent;
+
+  &:hover {
+    color: $color-accent-dark;
+  }
+}
+
+h1,
+h2,
+h3 {
+  color: $color-text;
+  font-weight: 700;
+}

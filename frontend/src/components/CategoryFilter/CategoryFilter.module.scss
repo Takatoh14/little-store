@@ -1,0 +1,29 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  margin-bottom: $space-5;
+}
+
+.chip {
+  @include button-reset;
+  padding: $space-2 $space-4;
+  border: 1px solid $color-border;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  background: $color-bg;
+  color: $color-text;
+
+  &:hover {
+    border-color: $color-accent;
+  }
+}
+
+.chipActive {
+  background: $color-ink;
+  border-color: $color-ink;
+  color: #fff;
+}

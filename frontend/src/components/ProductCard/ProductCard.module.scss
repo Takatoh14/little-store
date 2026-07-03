@@ -1,0 +1,64 @@
+@use "../../styles/tokens" as *;
+
+.card {
+  display: block;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-card;
+  overflow: hidden;
+  transition: box-shadow 0.15s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.imageWrapper {
+  aspect-ratio: 1 / 1;
+  background: $color-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imagePlaceholder {
+  color: $color-text-muted;
+  font-size: 0.8rem;
+}
+
+.body {
+  padding: $space-3;
+}
+
+.name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: $color-text;
+  margin-bottom: $space-1;
+}
+
+.category {
+  font-size: 0.75rem;
+  color: $color-text-muted;
+  margin-bottom: $space-2;
+}
+
+.price {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: $color-accent;
+}
+
+.outOfStock {
+  display: inline-block;
+  margin-top: $space-1;
+  font-size: 0.75rem;
+  color: $color-danger;
+}

@@ -21,6 +21,9 @@ services:
 
       # React から Laravel API を呼ぶURLです
       VITE_API_BASE_URL: "http://localhost:8000/api"
+
+      # Stripe公開可能キー。backend/.envのSTRIPE_KEYと同じ鍵ペアである必要があります
+      VITE_STRIPE_KEY: "pk_test_51TozygAby2QQpE5Vfch3uhpZtNVv9b8zggvzBUTLI8e7wZg2ayax8Ahs1YwsD85ccrM1DKi5z8eDro5cgAQi2d1Q00IVYZzsJl"
     depends_on:
       - backend
 
