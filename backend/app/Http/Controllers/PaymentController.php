@@ -48,7 +48,7 @@ class PaymentController extends Controller
 
         return response()->json([
             'message' => 'カード決済に失敗しました',
-            'decline_code' => 'insufficient_funds',
+            'decline_code' => $result['decline_code'],
         ], 402);
     }
 }

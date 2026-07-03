@@ -6,11 +6,10 @@ use App\Models\Order;
 use Illuminate\Support\Str;
 
 /**
- * Stripeのテスト用APIキーが未取得のため、実際のAPI通信を行わないモック実装。
+ * 自動テスト(testing環境)専用のモック実装。実際のAPI通信は行わない。
  * payment_method_idに "decline" または "fail" が含まれる場合のみ失敗させる
  * （Stripeのテスト用カード命名規則を模したルール）。
- * 本番のStripe連携に差し替える際は PaymentGatewayInterface の別実装を
- * AppServiceProvider でバインドし直すだけでよい。
+ * 開発・本番環境では StripePaymentGateway が使われる（AppServiceProvider参照）。
  */
 class MockStripePaymentGateway implements PaymentGatewayInterface
 {
@@ -22,6 +21,7 @@ class MockStripePaymentGateway implements PaymentGatewayInterface
         return [
             'succeeded' => ! $declined,
             'stripe_payment_id' => 'mock_'.Str::uuid(),
+            'decline_code' => $declined ? 'generic_decline' : '',
         ];
     }
 }
