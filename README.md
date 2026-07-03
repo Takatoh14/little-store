@@ -1,104 +1,109 @@
-# Little Store — 環境構築手順
+# Little Store
 
-このREADMEは、EC_基本設計書に基づいて用意したDocker環境のセットアップ手順です。上から順番に実行してください。
+Laravel（API）+ React（SPA）構成のECサイト・ポートフォリオプロジェクトです。会員登録から商品購入・Stripe決済・管理者による商品/注文管理まで、EC_要件定義書に基づく主要機能を一通り実装しています。
+
+## 技術スタック
+
+| 領域 | 技術 |
+|---|---|
+| バックエンド | PHP 8.4 / Laravel 13 / Laravel Sanctum（トークン認証） |
+| フロントエンド | React 19 / TypeScript / Vite / React Router v7 / SCSS Modules |
+| DB | MySQL 8 |
+| 決済 | Stripe（`stripe-php` SDK直接利用、テストモード） |
+| 実行環境 | Docker Compose（backend / frontend / mysql / phpmyadmin） |
+| テスト | PHPUnit（バックエンド Feature テスト、53件） |
+
+## 主な機能
+
+### 購入者向け
+
+- 会員登録・ログイン・ログアウト（Sanctumトークン認証）
+- 商品一覧（カテゴリ絞り込み・ページネーション）・商品詳細
+- カート（追加・数量変更・削除）
+- 注文（配送先入力 → Stripeカード決済 → 注文完了）
+- マイページ・注文履歴一覧/詳細
+- お問い合わせフォーム
+
+### 管理者向け（`role: admin`のユーザーのみ）
+
+- ダッシュボード（今月の売上・注文件数・会員数・在庫切れ件数、直近6か月の売上推移、カテゴリ別売上比率、最近の注文）
+- 商品管理（一覧・新規登録・編集・削除、画像アップロード）
+- 注文管理（一覧・詳細、ステータスを pending→paid→shipped→completed の順に1段階ずつ進行）
 
 ## 前提条件
 
-- Docker Desktop がインストール済みであること
-- Git がインストール済みであること
+- Docker Desktop
+- Git
 
-## 0. このフォルダの中身
-
-```
-little-store/
-├── docker/
-│   ├── backend/Dockerfile    … Laravel実行環境の定義
-│   ├── backend/start.sh      … backendコンテナの起動スクリプト
-│   ├── frontend/Dockerfile   … React(Vite)実行環境の定義
-│   └── mysql/
-│       ├── Dockerfile
-│       ├── conf.d/my.cnf     … データベースの文字コード設定
-│       └── init/01-init.sql  … 初期化用SQL
-├── backend/                  … Laravel（作成済み）
-├── frontend/                 … React（作成済み）
-├── docker-compose.yml
-└── .gitignore
-```
-
-以下の手順1・3（Laravel/Reactプロジェクトの作成）は既に完了しています。初めてこの環境を構築する場合の手順として残していますが、既存の`backend/`・`frontend/`をそのまま使う場合はステップ4から進めてください。
-
-## 1. Laravelプロジェクトを作成する
-
-`backend/` フォルダの中に、Laravel本体を作成します。
+## セットアップ
 
 ```bash
+git clone <このリポジトリ>
 cd little-store
 
-docker run --rm -v "$(pwd)/backend:/app" -w /app composer create-project laravel/laravel .
-```
-
-しばらく待つと、`backend/` フォルダの中にLaravelのファイル一式が生成されます。
-
-> 💡 **初心者向け解説**: `docker run --rm ...` は、Composer（PHPのパッケージ管理ツール）が入った一時的なコンテナを起動して、`backend/`フォルダの中にLaravelの雛形を作らせるコマンドです。`--rm`が付いているので、作業が終わるとこのコンテナ自体は自動的に消えます。
-
-## 2. .env ファイルを作成する
-
-```bash
 cp backend/.env.example backend/.env
-```
+cp frontend/.env.example frontend/.env
 
-コピーした `backend/.env` を開き、内容を確認してください（用意した`.env.example`はDocker環境に合わせた値が既に入っています）。
-
-## 3. Reactプロジェクトを作成する
-
-`frontend/` フォルダの中に、React + TypeScriptのプロジェクトを作成します。
-
-```bash
-docker run --rm -v "$(pwd)/frontend:/app" -w /app node:22-alpine \
-  npm create vite@latest . -- --template react-ts
-```
-
-途中で上書き確認を聞かれた場合は `y` を選択してください。
-
-## 4. Dockerコンテナを起動する
-
-```bash
 docker compose up -d --build
 ```
 
-初回はイメージのビルドに数分かかります。起動後、以下にアクセスできれば成功です。
+初回はイメージのビルドに数分かかります。起動後、以下にアクセスできます。
 
 | URL | 内容 |
 |---|---|
-| http://localhost:8000 | Laravel（バックエンド API） |
-| http://localhost:5173 | React（フロントエンド開発サーバー） |
+| http://localhost:5173 | フロントエンド（React） |
+| http://localhost:8000 | バックエンドAPI（Laravel） |
 | http://localhost:8081 | phpMyAdmin |
 
-## 5. Laravelの初期設定を行う
-
-コンテナが起動した状態で、以下を実行します。
+続けて、アプリケーションキーの生成・マイグレーション・ダミーデータ投入を行います。
 
 ```bash
-# アプリケーションキーの生成（.envのAPP_KEYが設定されます）
 docker compose exec backend php artisan key:generate
-
-# Sanctum（認証機能）のインストール
-docker compose exec backend php artisan install:api
-
-# マイグレーションの実行（現時点ではLaravel標準テーブルのみ。EC固有テーブルは次のステップで追加）
-docker compose exec backend php artisan migrate
+docker compose exec backend php artisan migrate --seed
 ```
 
-> 💡 **初心者向け解説**: `docker compose exec backend ...` は、既に起動しているbackendコンテナ（Laravel）の中でコマンドを実行する、という意味です。`artisan`はLaravelに標準で付いてくる便利なコマンドラインツールで、テーブル作成やキャッシュのクリアなど、開発でよく使う作業をコマンド一つで行えます。
->
-> `install:api` の実行後、案内に従って `app/Models/User.php` に `Laravel\Sanctum\HasApiTokens` トレイトを追加してください。
+### .env で設定が必要な項目
 
-## 6. 動作確認
+`backend/.env.example` は Docker 環境に合わせた値が入っていますが、以下は各自の値に差し替えてください（差し替えなくても決済・メール送信以外の機能は動作します）。
 
-- ブラウザで `http://localhost:8000` を開き、Laravelのウェルカムページが表示されればOKです
-- `http://localhost:5173` を開き、Viteのデフォルト画面が表示されればOKです
-- `http://localhost:8081` でphpMyAdminにアクセスできればOKです
-- `docker compose exec mysql mysql -u laravel -psecret little_store -e "SHOW TABLES;"` でテーブル一覧が確認できればDB接続もOKです
+| 変数 | 内容 |
+|---|---|
+| `STRIPE_KEY` / `STRIPE_SECRET` | Stripeのテストモード公開鍵・秘密鍵。未設定時は決済APIが失敗します |
+| `MAIL_MAILER` | デフォルトは`log`（`storage/logs/laravel.log`に出力されるだけで実送信されません）。実際にメールを送るには`smtp`等に変更しSMTP系の値を設定してください |
+| `MAIL_ADMIN_ADDRESS` | お問い合わせフォーム送信時の通知先メールアドレス |
+
+`frontend/.env.example`の`VITE_STRIPE_KEY`は`backend/.env`の`STRIPE_KEY`と同じ鍵ペア（公開可能キー）を設定してください。
+
+## 動作確認用アカウント
+
+`php artisan migrate --seed` 実行後、以下のアカウントが使えます（パスワードは共通で `password`）。
+
+| メールアドレス | 権限 |
+|---|---|
+| `admin@example.com` | 管理者（商品/注文管理・ダッシュボードにアクセス可） |
+| `test@example.com` | 一般会員 |
+
+Stripe決済のテストには、以下のテストカード番号が使えます（実際の課金は発生しません）。
+
+| 用途 | カード番号 |
+|---|---|
+| 決済成功 | `4242 4242 4242 4242` |
+| 決済失敗（カード拒否） | `4000 0000 0000 0002` |
+
+有効期限は未来の日付、CVCは任意の3桁で構いません。
+
+## テストの実行
+
+```bash
+docker compose exec backend php artisan test
+```
+
+フロントエンドの型チェック・Lintは以下で実行できます（自動テストは未整備です）。
+
+```bash
+docker compose exec frontend npx tsc -b
+docker compose exec frontend npx eslint .
+```
 
 ## よく使うコマンド
 
@@ -110,6 +115,32 @@ docker compose exec backend php artisan migrate
 | `docker compose exec backend bash` | backendコンテナの中に入る |
 | `docker compose exec backend php artisan migrate:fresh --seed` | テーブルを作り直してダミーデータを投入 |
 
-## 次のステップ
+## プロジェクト構成
 
-環境構築が完了したら、EC_詳細設計書の「処理フロー」を参考に、Controller・Model・マイグレーションファイルの実装（詳細設計フェーズの続き）に進みます。
+```
+little-store/
+├── docker/                    … 各サービスのDockerfile・起動スクリプト
+├── backend/                   … Laravel（API）
+│   ├── app/Http/Controllers/  … 購入者向けコントローラー（Admin/配下は管理者向け）
+│   ├── app/Http/Requests/     … フォームリクエスト（バリデーション）
+│   ├── app/Http/Resources/    … APIレスポンス整形
+│   ├── app/Models/            … Eloquentモデル
+│   ├── app/Services/          … Stripe決済ゲートウェイ（Mock/実APIの切替）
+│   └── tests/Feature/         … APIごとのFeatureテスト
+├── frontend/                  … React（SPA）
+│   └── src/
+│       ├── api/                … axiosベースのAPIクライアント
+│       ├── components/         … 共通UIコンポーネント・認証ガード
+│       ├── contexts/           … 認証・カートのContext
+│       ├── hooks/               … カスタムフック（useAsync等）
+│       ├── pages/               … 画面ごとのコンポーネント
+│       └── types/               … 型定義
+├── document/                  … 要件定義書・設計書（企画時の資料、実装後は更新していません）
+└── docker-compose.yml
+```
+
+## 既知の制約
+
+- フロントエンドの自動テストは未整備です（バックエンドのFeatureテストのみ）
+- 商品削除・画像差し替え時に、不要になった画像ファイルのクリーンアップは行っていません
+- 本番デプロイ用の設定（HTTPS、環境変数の秘匿管理、CDN配信など）は含まれていません。あくまでローカル開発環境（Docker Compose）を前提としています
