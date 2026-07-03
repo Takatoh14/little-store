@@ -80,7 +80,7 @@ export function AdminProductListPage() {
                 {product.image_url ? (
                   <img src={product.image_url} alt={product.name} className={styles.thumb} />
                 ) : (
-                  <div className={styles.thumbPlaceholder}>No Image</div>
+                  <div className={styles.thumbPlaceholder}>画像なし</div>
                 )}
                 <div className={styles.info}>
                   <p className={styles.name}>{product.name}</p>

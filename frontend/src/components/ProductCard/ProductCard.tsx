@@ -9,7 +9,7 @@ export function ProductCard({ product }: { product: Product }) {
         {product.image_url ? (
           <img src={product.image_url} alt={product.name} className={styles.image} />
         ) : (
-          <span className={styles.imagePlaceholder}>No Image</span>
+          <span className={styles.imagePlaceholder}>画像なし</span>
         )}
       </div>
       <div className={styles.body}>

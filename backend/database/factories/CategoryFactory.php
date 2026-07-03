@@ -15,10 +15,12 @@ class CategoryFactory extends Factory
      *
      * @return array<string, mixed>
      */
+    private const NAMES = ['文房具', 'キッチン雑貨', 'インテリア雑貨', 'アクセサリー', '書籍', 'ファッション雑貨'];
+
     public function definition(): array
     {
         return [
-            'name' => fake()->words(2, true),
+            'name' => fake()->randomElement(self::NAMES),
         ];
     }
 }
