@@ -1,0 +1,21 @@
+# Laravel
+/backend/vendor
+/backend/.env
+/backend/storage/*.key
+/backend/bootstrap/cache/*.php
+/backend/public/hot
+/backend/public/storage
+
+# React / Vite
+/frontend/node_modules
+/frontend/dist
+/frontend/.env
+
+# OS / エディタ
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# Docker
+docker/mysql/data

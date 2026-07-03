@@ -1,0 +1,121 @@
+services:
+  # React + Vite フロントエンド
+  frontend:
+    build:
+      # Dockerfile は docker/frontend 配下に置きます
+      context: ./docker/frontend
+      dockerfile: Dockerfile
+    container_name: little-store-frontend
+    ports:
+      # React Vite の開発サーバー
+      - "5173:5173"
+    volumes:
+      # ローカルの frontend をコンテナの /app にマウントします
+      - ./frontend:/app
+
+      # node_modules はコンテナ側の名前付きボリュームに保持します
+      - frontend_node_modules:/app/node_modules
+    environment:
+      # Windows環境でファイル変更検知を安定させます
+      CHOKIDAR_USEPOLLING: "true"
+
+      # React から Laravel API を呼ぶURLです
+      VITE_API_BASE_URL: "http://localhost:8000/api"
+    depends_on:
+      - backend
+
+  # Laravel バックエンド
+  backend:
+    build:
+      # Dockerfile は docker/backend 配下に置きます
+      context: ./docker/backend
+      dockerfile: Dockerfile
+    container_name: little-store-backend
+    ports:
+      # Laravel の開発サーバー
+      - "8000:8000"
+    volumes:
+      # ローカルの backend をコンテナの /var/www/html にマウントします
+      - ./backend:/var/www/html
+
+      # vendor はコンテナ側の名前付きボリュームに保持します
+      - backend_vendor:/var/www/html/vendor
+    environment:
+      # Laravel から MySQL へ接続するための設定です
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: little_store
+      DB_USERNAME: laravel
+      DB_PASSWORD: secret
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # MySQL
+  mysql:
+    build:
+      # MySQL用Dockerfileは docker/mysql 配下に置きます
+      context: ./docker/mysql
+      dockerfile: Dockerfile
+    container_name: little-store-mysql
+    ports:
+      # PC側からは 3307、コンテナ内では 3306 で接続します
+      - "3307:3306"
+    environment:
+      # 初期作成するDB名です
+      MYSQL_DATABASE: little_store
+
+      # Laravel用ユーザーです
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+
+      # rootユーザーのパスワードです
+      MYSQL_ROOT_PASSWORD: root_secret
+
+      # タイムゾーン設定です
+      TZ: Asia/Tokyo
+    volumes:
+      # MySQLデータを永続化します
+      - mysql_data:/var/lib/mysql
+
+      # 初期SQLを配置するフォルダです
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      # MySQLが起動完了したか確認します
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-proot_secret",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin:5.2-apache
+    container_name: little-store-phpmyadmin
+    ports:
+      # 8080が他で使われている可能性を避けるため、8081にします
+      - "8081:80"
+    environment:
+      # 接続先MySQLコンテナ名です
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+
+      # Laravel用ユーザーで自動ログインさせます
+      PMA_USER: laravel
+      PMA_PASSWORD: secret
+    depends_on:
+      mysql:
+        condition: service_healthy
+volumes:
+  mysql_data:
+  frontend_node_modules:
+  backend_vendor:
