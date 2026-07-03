@@ -21,8 +21,16 @@ export function Header() {
         </Link>
         <nav className={styles.nav}>
           <Link to="/products">商品一覧</Link>
+          <Link to="/contact">お問い合わせ</Link>
           {user ? (
             <>
+              {user.role === 'admin' && (
+                <>
+                  <Link to="/admin/products">商品管理</Link>
+                  <Link to="/admin/orders">注文管理</Link>
+                </>
+              )}
+              <Link to="/mypage">マイページ</Link>
               <Link to="/cart" className={styles.cartLink}>
                 カート
                 {totalCount > 0 && <span className={styles.badge}>{totalCount}</span>}

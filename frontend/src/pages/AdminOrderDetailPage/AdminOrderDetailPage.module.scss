@@ -1,0 +1,60 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.section {
+  @include page-section;
+  max-width: 560px;
+}
+
+.title {
+  font-size: 1.4rem;
+  margin-bottom: $space-5;
+}
+
+.detail {
+  padding: $space-4;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-card;
+  margin-bottom: $space-5;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  padding: $space-2 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.itemsTitle {
+  font-weight: 600;
+  margin: $space-3 0 $space-2;
+}
+
+.advanceButton {
+  max-width: 260px;
+  margin-bottom: $space-4;
+}
+
+.completedBadge {
+  display: inline-block;
+  padding: $space-2 $space-4;
+  border-radius: 999px;
+  background: $color-success;
+  color: #fff;
+  font-size: 0.85rem;
+  margin-bottom: $space-4;
+}
+
+.banner {
+  @include banner-error;
+}
+
+.backLink {
+  display: inline-block;
+}

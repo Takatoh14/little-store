@@ -20,6 +20,7 @@ class OrderResource extends JsonResource
             'total_price' => $this->total_price,
             'shipping_address' => $this->shipping_address,
             'phone' => $this->phone,
+            'created_at' => $this->created_at,
             'items' => OrderItemResource::collection($this->whenLoaded('orderItems')),
             'user' => $this->whenLoaded('user', fn () => [
                 'id' => $this->user->id,

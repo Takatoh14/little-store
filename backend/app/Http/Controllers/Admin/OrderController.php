@@ -20,6 +20,11 @@ class OrderController extends Controller
         return OrderResource::collection($orders);
     }
 
+    public function show(Order $order): JsonResponse
+    {
+        return response()->json(new OrderResource($order->load(['orderItems', 'user'])));
+    }
+
     public function update(OrderUpdateRequest $request, Order $order): JsonResponse
     {
         $currentIndex = array_search($order->status, self::STATUS_SEQUENCE, true);
@@ -31,6 +36,6 @@ class OrderController extends Controller
 
         $order->update(['status' => $request->status]);
 
-        return response()->json(new OrderResource($order->load('orderItems')));
+        return response()->json(new OrderResource($order->load(['orderItems', 'user'])));
     }
 }

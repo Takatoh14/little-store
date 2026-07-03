@@ -13,3 +13,27 @@ export async function getProduct(id: number): Promise<Product> {
   const res = await client.get<Product>(`/products/${id}`)
   return res.data
 }
+
+// GET /admin/products は公開の一覧と同じ形(Collectionをそのまま返す)のためページネートラップ
+export async function getAdminProducts(params: { category_id?: number; page?: number }): Promise<Paginated<Product>> {
+  const res = await client.get<Paginated<Product>>('/admin/products', { params })
+  return res.data
+}
+
+// POST /admin/products は response()->json(new ProductResource(...), 201) のためflat
+export async function createAdminProduct(formData: FormData): Promise<Product> {
+  const res = await client.post<Product>('/admin/products', formData)
+  return res.data
+}
+
+// PHPは真のPUTリクエストでは$_FILES/multipartを解析しないため、
+// POST + _methodフィールドによるメソッドスプーフィングで送信する
+export async function updateAdminProduct(id: number, formData: FormData): Promise<Product> {
+  formData.append('_method', 'PUT')
+  const res = await client.post<Product>(`/admin/products/${id}`, formData)
+  return res.data
+}
+
+export async function deleteAdminProduct(id: number): Promise<void> {
+  await client.delete(`/admin/products/${id}`)
+}

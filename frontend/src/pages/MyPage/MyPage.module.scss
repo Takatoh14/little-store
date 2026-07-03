@@ -1,0 +1,35 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.section {
+  @include narrow-form-page;
+}
+
+.title {
+  font-size: 1.4rem;
+  margin-bottom: $space-5;
+}
+
+.card {
+  padding: $space-4;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-card;
+  margin-bottom: $space-5;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: $space-2 0;
+  border-bottom: 1px solid $color-border;
+  font-size: 0.9rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.label {
+  color: $color-text-muted;
+}

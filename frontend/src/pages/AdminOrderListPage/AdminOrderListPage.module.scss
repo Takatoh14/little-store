@@ -1,0 +1,48 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.section {
+  @include page-section;
+}
+
+.title {
+  font-size: 1.4rem;
+  margin-bottom: $space-5;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  padding: $space-4;
+  border: 1px solid $color-border;
+  border-radius: $radius-card;
+  background: $color-surface;
+}
+
+.rowInfo {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.orderId {
+  font-weight: 600;
+}
+
+.meta {
+  font-size: 0.8rem;
+  color: $color-text-muted;
+}
+
+.price {
+  font-weight: 700;
+  color: $color-accent;
+}

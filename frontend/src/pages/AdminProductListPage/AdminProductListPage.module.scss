@@ -1,0 +1,92 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.section {
+  @include page-section;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $space-5;
+}
+
+.title {
+  font-size: 1.4rem;
+}
+
+.newButton {
+  width: auto;
+  padding: $space-2 $space-4;
+}
+
+.banner {
+  @include banner-error;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+  padding: $space-3;
+  border: 1px solid $color-border;
+  border-radius: $radius-card;
+  background: $color-surface;
+}
+
+.thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: $radius-input;
+  object-fit: cover;
+  background: $color-bg;
+  flex-shrink: 0;
+}
+
+.thumbPlaceholder {
+  width: 56px;
+  height: 56px;
+  border-radius: $radius-input;
+  background: $color-bg;
+  border: 1px solid $color-border;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  color: $color-text-muted;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.meta {
+  font-size: 0.8rem;
+  color: $color-text-muted;
+}
+
+.actions {
+  display: flex;
+  gap: $space-3;
+  flex-shrink: 0;
+}
+
+.deleteButton {
+  @include button-reset;
+  color: $color-danger;
+  font-size: 0.85rem;
+  text-decoration: underline;
+}

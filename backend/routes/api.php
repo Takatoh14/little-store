@@ -38,8 +38,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/payments', [PaymentController::class, 'store']);
 
     Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/products', [AdminProductController::class, 'index']);
         Route::post('/products', [AdminProductController::class, 'store']);
+        Route::put('/products/{product}', [AdminProductController::class, 'update']);
+        Route::delete('/products/{product}', [AdminProductController::class, 'destroy']);
+
         Route::get('/orders', [AdminOrderController::class, 'index']);
+        Route::get('/orders/{order}', [AdminOrderController::class, 'show']);
         Route::put('/orders/{order}', [AdminOrderController::class, 'update']);
     });
 });

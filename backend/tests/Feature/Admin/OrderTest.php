@@ -82,4 +82,27 @@ class OrderTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_admin_can_view_any_order_detail(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $customer = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $customer->id]);
+
+        $response = $this->actingAs($admin)->getJson('/api/admin/orders/'.$order->id);
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('id', $order->id);
+        $response->assertJsonPath('user.email', $customer->email);
+    }
+
+    public function test_non_admin_cannot_view_admin_order_detail(): void
+    {
+        $customer = User::factory()->create();
+        $order = Order::factory()->create();
+
+        $response = $this->actingAs($customer)->getJson('/api/admin/orders/'.$order->id);
+
+        $response->assertStatus(403);
+    }
 }
