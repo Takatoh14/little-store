@@ -17,5 +17,8 @@
 .vscode/*
 !.vscode/extensions.json
 
+# Claude Code
+.claude/
+
 # Docker
 docker/mysql/data
