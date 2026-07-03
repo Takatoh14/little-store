@@ -26,6 +26,8 @@ class DashboardTest extends TestCase
         OrderItem::create([
             'order_id' => $paidOrder->id,
             'product_id' => $product->id,
+            'product_name' => $product->name,
+            'product_image_url' => $product->image_url,
             'price' => 1000,
             'quantity' => 3,
         ]);

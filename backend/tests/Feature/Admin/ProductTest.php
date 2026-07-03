@@ -173,6 +173,8 @@ class ProductTest extends TestCase
         OrderItem::create([
             'order_id' => $order->id,
             'product_id' => $product->id,
+            'product_name' => $product->name,
+            'product_image_url' => $product->image_url,
             'price' => $product->price,
             'quantity' => 1,
         ]);

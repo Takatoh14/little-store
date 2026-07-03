@@ -107,7 +107,7 @@ export function AdminOrderDetailPage() {
             {order.items.map((item) => (
               <div key={item.id} className={styles.detailRow}>
                 <span>
-                  商品ID: {item.product_id} × {item.quantity}
+                  {item.product_name} × {item.quantity}
                 </span>
                 <span>¥{(item.price * item.quantity).toLocaleString('ja-JP')}</span>
               </div>

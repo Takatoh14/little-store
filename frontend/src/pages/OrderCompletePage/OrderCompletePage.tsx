@@ -79,7 +79,7 @@ export function OrderCompletePage() {
             <p className={styles.itemsTitle}>注文内容</p>
             {order.items.map((item) => (
               <div key={item.id} className={styles.detailRow}>
-                <span>商品ID: {item.product_id} × {item.quantity}</span>
+                <span>{item.product_name} × {item.quantity}</span>
                 <span>¥{(item.price * item.quantity).toLocaleString('ja-JP')}</span>
               </div>
             ))}

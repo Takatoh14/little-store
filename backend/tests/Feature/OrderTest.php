@@ -97,6 +97,8 @@ class OrderTest extends TestCase
         $order = Order::factory()->create(['user_id' => $user->id]);
         $order->orderItems()->create([
             'product_id' => $product->id,
+            'product_name' => $product->name,
+            'product_image_url' => $product->image_url,
             'price' => 500,
             'quantity' => 1,
         ]);
@@ -105,6 +107,7 @@ class OrderTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJsonPath('items.0.product_id', $product->id);
+        $response->assertJsonPath('items.0.product_name', $product->name);
     }
 
     public function test_show_returns_404_for_other_users_order(): void
