@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\AuthController;
@@ -38,6 +39,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/payments', [PaymentController::class, 'store']);
 
     Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index']);
+
         Route::get('/products', [AdminProductController::class, 'index']);
         Route::post('/products', [AdminProductController::class, 'store']);
         Route::put('/products/{product}', [AdminProductController::class, 'update']);

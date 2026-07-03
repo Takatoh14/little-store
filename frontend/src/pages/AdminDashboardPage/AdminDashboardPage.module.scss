@@ -1,0 +1,176 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.section {
+  @include page-section;
+}
+
+.title {
+  font-size: 1.4rem;
+  margin-bottom: $space-5;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $space-4;
+  margin-bottom: $space-6;
+
+  @include pc {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-4;
+  border: 1px solid $color-border;
+  border-radius: $radius-card;
+  background: $color-surface;
+}
+
+.tileLabel {
+  font-size: 0.8rem;
+  color: $color-text-muted;
+}
+
+.tileValue {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: $color-accent;
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $space-5;
+  margin-bottom: $space-5;
+
+  @include pc {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.panel {
+  padding: $space-4;
+  border: 1px solid $color-border;
+  border-radius: $radius-card;
+  background: $color-surface;
+  margin-bottom: $space-5;
+}
+
+.panelTitle {
+  font-size: 1.05rem;
+  margin-bottom: $space-4;
+}
+
+.emptyText {
+  color: $color-text-muted;
+  font-size: 0.9rem;
+}
+
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: $space-3;
+  height: 200px;
+}
+
+.bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.barValue {
+  font-size: 0.7rem;
+  color: $color-text-muted;
+  margin-bottom: $space-1;
+  white-space: nowrap;
+}
+
+.barFill {
+  width: 100%;
+  background: $color-accent;
+  border-radius: $radius-input $radius-input 0 0;
+  min-height: 2px;
+}
+
+.barLabel {
+  margin-top: $space-2;
+  font-size: 0.75rem;
+  color: $color-text-muted;
+}
+
+.categoryList {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.categoryRow {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.categoryHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.categoryBarTrack {
+  height: 8px;
+  border-radius: 4px;
+  background: $color-border;
+  overflow: hidden;
+}
+
+.categoryBarFill {
+  height: 100%;
+  background: $color-ink;
+  border-radius: 4px;
+}
+
+.orderList {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.orderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  padding: $space-3 $space-4;
+  border: 1px solid $color-border;
+  border-radius: $radius-input;
+  background: $color-bg;
+}
+
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.orderId {
+  font-weight: 600;
+}
+
+.meta {
+  font-size: 0.8rem;
+  color: $color-text-muted;
+}
+
+.price {
+  font-weight: 700;
+  color: $color-accent;
+}

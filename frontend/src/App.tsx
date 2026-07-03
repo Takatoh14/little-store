@@ -5,6 +5,7 @@ import { RequireAuth } from './components/RequireAuth/RequireAuth'
 import { Layout } from './components/Layout/Layout'
 import { AuthProvider } from './contexts/AuthContext'
 import { CartProvider } from './contexts/CartContext'
+import { AdminDashboardPage } from './pages/AdminDashboardPage/AdminDashboardPage'
 import { AdminOrderDetailPage } from './pages/AdminOrderDetailPage/AdminOrderDetailPage'
 import { AdminOrderListPage } from './pages/AdminOrderListPage/AdminOrderListPage'
 import { AdminProductFormPage } from './pages/AdminProductFormPage/AdminProductFormPage'
@@ -51,6 +52,7 @@ function App() {
                 <Route path="orders/:id" element={<OrderHistoryDetailPage />} />
 
                 <Route element={<RequireAdmin />}>
+                  <Route path="admin/dashboard" element={<AdminDashboardPage />} />
                   <Route path="admin/products" element={<AdminProductListPage />} />
                   <Route path="admin/products/new" element={<AdminProductFormPage />} />
                   <Route path="admin/products/:id/edit" element={<AdminProductFormPage />} />

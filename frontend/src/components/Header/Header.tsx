@@ -26,6 +26,7 @@ export function Header() {
             <>
               {user.role === 'admin' && (
                 <>
+                  <Link to="/admin/dashboard">ダッシュボード</Link>
                   <Link to="/admin/products">商品管理</Link>
                   <Link to="/admin/orders">注文管理</Link>
                 </>
