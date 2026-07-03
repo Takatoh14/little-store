@@ -12,17 +12,20 @@
 ```
 little-store/
 ├── docker/
-│   ├── nginx/default.conf   … Webサーバーの設定
-│   ├── php/Dockerfile        … Laravel実行環境の定義
-│   └── mysql/my.cnf          … データベースの文字コード設定
-├── backend/                  … Laravel（ここに作成します。今は空です）
-│   └── .env.example
-├── frontend/                 … React（ここに作成します。今は空です）
+│   ├── backend/Dockerfile    … Laravel実行環境の定義
+│   ├── backend/start.sh      … backendコンテナの起動スクリプト
+│   ├── frontend/Dockerfile   … React(Vite)実行環境の定義
+│   └── mysql/
+│       ├── Dockerfile
+│       ├── conf.d/my.cnf     … データベースの文字コード設定
+│       └── init/01-init.sql  … 初期化用SQL
+├── backend/                  … Laravel（作成済み）
+├── frontend/                 … React（作成済み）
 ├── docker-compose.yml
 └── .gitignore
 ```
 
-`backend/` と `frontend/` はまだ空です。これは、実際のLaravel/Reactプロジェクトの雛形を作るには、パッケージをインターネットからダウンロードする必要があり、その作業はみなさんのPC上のDocker環境で行う必要があるためです。以下の手順で作成していきます。
+以下の手順1・3（Laravel/Reactプロジェクトの作成）は既に完了しています。初めてこの環境を構築する場合の手順として残していますが、既存の`backend/`・`frontend/`をそのまま使う場合はステップ4から進めてください。
 
 ## 1. Laravelプロジェクトを作成する
 
@@ -67,8 +70,9 @@ docker compose up -d --build
 
 | URL | 内容 |
 |---|---|
-| http://localhost | Laravel（バックエンド API） |
+| http://localhost:8000 | Laravel（バックエンド API） |
 | http://localhost:5173 | React（フロントエンド開発サーバー） |
+| http://localhost:8081 | phpMyAdmin |
 
 ## 5. Laravelの初期設定を行う
 
@@ -76,22 +80,25 @@ docker compose up -d --build
 
 ```bash
 # アプリケーションキーの生成（.envのAPP_KEYが設定されます）
-docker compose exec app php artisan key:generate
+docker compose exec backend php artisan key:generate
 
 # Sanctum（認証機能）のインストール
-docker compose exec app php artisan install:api
+docker compose exec backend php artisan install:api
 
-# マイグレーションの実行（EC_基本設計書のテーブルが作成されます）
-docker compose exec app php artisan migrate
+# マイグレーションの実行（現時点ではLaravel標準テーブルのみ。EC固有テーブルは次のステップで追加）
+docker compose exec backend php artisan migrate
 ```
 
-> 💡 **初心者向け解説**: `docker compose exec app ...` は、既に起動しているappコンテナ（Laravel）の中でコマンドを実行する、という意味です。`artisan`はLaravelに標準で付いてくる便利なコマンドラインツールで、テーブル作成やキャッシュのクリアなど、開発でよく使う作業をコマンド一つで行えます。
+> 💡 **初心者向け解説**: `docker compose exec backend ...` は、既に起動しているbackendコンテナ（Laravel）の中でコマンドを実行する、という意味です。`artisan`はLaravelに標準で付いてくる便利なコマンドラインツールで、テーブル作成やキャッシュのクリアなど、開発でよく使う作業をコマンド一つで行えます。
+>
+> `install:api` の実行後、案内に従って `app/Models/User.php` に `Laravel\Sanctum\HasApiTokens` トレイトを追加してください。
 
 ## 6. 動作確認
 
-- ブラウザで `http://localhost` を開き、Laravelのウェルカムページが表示されればOKです
+- ブラウザで `http://localhost:8000` を開き、Laravelのウェルカムページが表示されればOKです
 - `http://localhost:5173` を開き、Viteのデフォルト画面が表示されればOKです
-- `docker compose exec db mysql -u little_store_user -psecret little_store -e "SHOW TABLES;"` でテーブル一覧が確認できればDB接続もOKです
+- `http://localhost:8081` でphpMyAdminにアクセスできればOKです
+- `docker compose exec mysql mysql -u laravel -psecret little_store -e "SHOW TABLES;"` でテーブル一覧が確認できればDB接続もOKです
 
 ## よく使うコマンド
 
@@ -99,9 +106,9 @@ docker compose exec app php artisan migrate
 |---|---|
 | `docker compose up -d` | コンテナを起動（バックグラウンド） |
 | `docker compose down` | コンテナを停止・削除 |
-| `docker compose logs -f app` | Laravelのログをリアルタイム表示 |
-| `docker compose exec app bash` | appコンテナの中に入る |
-| `docker compose exec app php artisan migrate:fresh --seed` | テーブルを作り直してダミーデータを投入 |
+| `docker compose logs -f backend` | Laravelのログをリアルタイム表示 |
+| `docker compose exec backend bash` | backendコンテナの中に入る |
+| `docker compose exec backend php artisan migrate:fresh --seed` | テーブルを作り直してダミーデータを投入 |
 
 ## 次のステップ
 
