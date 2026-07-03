@@ -34,4 +34,20 @@ class ProductTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonCount(0, 'data');
     }
+
+    public function test_show_returns_product_detail(): void
+    {
+        $product = Product::factory()->create();
+
+        $response = $this->getJson('/api/products/'.$product->id);
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('id', $product->id);
+        $response->assertJsonPath('category.id', $product->category_id);
+    }
+
+    public function test_show_returns_404_for_missing_product(): void
+    {
+        $this->getJson('/api/products/999999')->assertStatus(404);
+    }
 }

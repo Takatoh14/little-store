@@ -9,11 +9,29 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        $orders = Order::where('user_id', $request->user()->id)->latest()->paginate(20);
+
+        return OrderResource::collection($orders);
+    }
+
+    public function show(Request $request, Order $order): JsonResponse
+    {
+        if ($order->user_id !== $request->user()->id) {
+            abort(404);
+        }
+
+        return response()->json(new OrderResource($order->load('orderItems')));
+    }
+
     public function store(OrderStoreRequest $request): JsonResponse
     {
         $user = $request->user();

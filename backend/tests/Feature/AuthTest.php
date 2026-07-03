@@ -84,4 +84,21 @@ class AuthTest extends TestCase
 
         $response->assertStatus(401);
     }
+
+    public function test_logout_revokes_current_token(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/logout');
+
+        $response->assertStatus(204);
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_logout_requires_authentication(): void
+    {
+        $this->postJson('/api/logout')->assertStatus(401);
+    }
 }

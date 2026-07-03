@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -18,5 +19,10 @@ class ProductController extends Controller
             ->paginate(20);
 
         return ProductResource::collection($products);
+    }
+
+    public function show(Product $product): JsonResponse
+    {
+        return response()->json(new ProductResource($product->load('category')));
     }
 }

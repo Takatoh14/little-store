@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\CartItem;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -73,5 +74,47 @@ class OrderTest extends TestCase
 
         $response->assertStatus(422);
         $response->assertJson(['message' => 'カートが空です']);
+    }
+
+    public function test_index_lists_only_authenticated_users_orders(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        Order::factory(2)->create(['user_id' => $user->id]);
+        Order::factory()->create(['user_id' => $otherUser->id]);
+
+        $response = $this->actingAs($user)->getJson('/api/orders');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(2, 'data');
+    }
+
+    public function test_show_returns_own_order_with_items(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id]);
+        $order->orderItems()->create([
+            'product_id' => $product->id,
+            'price' => 500,
+            'quantity' => 1,
+        ]);
+
+        $response = $this->actingAs($user)->getJson('/api/orders/'.$order->id);
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('items.0.product_id', $product->id);
+    }
+
+    public function test_show_returns_404_for_other_users_order(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $otherUser->id]);
+
+        $response = $this->actingAs($user)->getJson('/api/orders/'.$order->id);
+
+        $response->assertStatus(404);
     }
 }

@@ -115,4 +115,15 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Notification Address
+    |--------------------------------------------------------------------------
+    |
+    | お問い合わせフォーム等、管理者への通知メールの宛先です。
+    |
+    */
+
+    'admin_address' => env('MAIL_ADMIN_ADDRESS', 'devprojects202511@gmail.com'),
+
 ];

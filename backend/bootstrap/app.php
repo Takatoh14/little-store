@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         ]);
+
+        // APIのみのアプリケーションのためWebログイン画面が存在しない。
+        // 未認証時にAcceptヘッダー次第で `route('login')` へリダイレクトしようとして
+        // RouteNotFoundException(500)になるのを防ぎ、常にJSON 401を返す。
+        $middleware->redirectGuestsTo(fn () => null);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
