@@ -20,5 +20,8 @@
 # Claude Code
 .claude/
 
+# Docker Compose（docker-compose.ymlの変数展開に使うルート直下の.env）
+/.env
+
 # Docker
 docker/mysql/data
