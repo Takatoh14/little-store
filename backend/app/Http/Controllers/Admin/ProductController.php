@@ -25,6 +25,11 @@ class ProductController extends Controller
         return ProductResource::collection($products);
     }
 
+    public function show(Product $product): JsonResponse
+    {
+        return response()->json(new ProductResource($product->load('category')));
+    }
+
     public function store(ProductStoreRequest $request): JsonResponse
     {
         $imageUrl = Storage::disk('public')->url(
@@ -38,6 +43,7 @@ class ProductController extends Controller
             'price' => $request->price,
             'stock' => $request->stock,
             'image_url' => $imageUrl,
+            'is_published' => $request->boolean('is_published'),
         ]);
 
         return response()->json(new ProductResource($product->load('category')), 201);

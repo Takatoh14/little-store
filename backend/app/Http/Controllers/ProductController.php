@@ -15,6 +15,7 @@ class ProductController extends Controller
         $categoryId = $request->query('category_id');
 
         $products = Product::with('category')
+            ->where('is_published', true)
             ->when($categoryId, fn ($query) => $query->where('category_id', $categoryId))
             ->paginate(20);
 
@@ -23,6 +24,10 @@ class ProductController extends Controller
 
     public function show(Product $product): JsonResponse
     {
+        if (! $product->is_published) {
+            abort(404);
+        }
+
         return response()->json(new ProductResource($product->load('category')));
     }
 }

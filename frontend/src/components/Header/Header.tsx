@@ -29,6 +29,7 @@ export function Header() {
                   <Link to="/admin/dashboard">ダッシュボード</Link>
                   <Link to="/admin/products">商品管理</Link>
                   <Link to="/admin/orders">注文管理</Link>
+                  <Link to="/admin/contacts">問い合わせ管理</Link>
                 </>
               )}
               <Link to="/mypage">マイページ</Link>

@@ -23,13 +23,28 @@ export async function createOrder(payload: {
   return res.data
 }
 
-// GET /admin/orders はCollectionをそのまま返すためページネートラップ
-export async function getAdminOrders(page?: number): Promise<Paginated<Order>> {
-  const res = await client.get<Paginated<Order>>('/admin/orders', { params: { page } })
+// POST /orders/{id}/complete, /cancel-request は response()->json(new OrderResource(...)) のためflat
+export async function completeOrder(id: number): Promise<Order> {
+  const res = await client.post<Order>(`/orders/${id}/complete`)
   return res.data
 }
 
-// GET/PUT /admin/orders/{id} は response()->json(new OrderResource(...)) のためflat
+export async function requestCancelOrder(id: number): Promise<Order> {
+  const res = await client.post<Order>(`/orders/${id}/cancel-request`)
+  return res.data
+}
+
+// GET /admin/orders はCollectionをそのまま返すためページネートラップ
+export async function getAdminOrders(params: {
+  page?: number
+  status?: OrderStatus
+  has_cancel_request?: boolean
+} = {}): Promise<Paginated<Order>> {
+  const res = await client.get<Paginated<Order>>('/admin/orders', { params })
+  return res.data
+}
+
+// GET/PUT/POST /admin/orders/{id}系 は response()->json(new OrderResource(...)) のためflat
 export async function getAdminOrder(id: number): Promise<Order> {
   const res = await client.get<Order>(`/admin/orders/${id}`)
   return res.data
@@ -37,5 +52,15 @@ export async function getAdminOrder(id: number): Promise<Order> {
 
 export async function updateAdminOrderStatus(id: number, status: OrderStatus): Promise<Order> {
   const res = await client.put<Order>(`/admin/orders/${id}`, { status })
+  return res.data
+}
+
+export async function approveCancelOrder(id: number): Promise<Order> {
+  const res = await client.post<Order>(`/admin/orders/${id}/approve-cancel`)
+  return res.data
+}
+
+export async function rejectCancelOrder(id: number): Promise<Order> {
+  const res = await client.post<Order>(`/admin/orders/${id}/reject-cancel`)
   return res.data
 }

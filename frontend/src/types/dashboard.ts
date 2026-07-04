@@ -1,13 +1,14 @@
 import type { Order } from './order'
 
-export interface SalesTrendPoint {
-  month: string
-  total: number
-}
-
 export interface CategoryBreakdownEntry {
   category_name: string
   total: number
+}
+
+export interface ContactCounts {
+  unread: number
+  read: number
+  answered: number
 }
 
 export interface DashboardSummary {
@@ -15,7 +16,7 @@ export interface DashboardSummary {
   monthly_order_count: number
   member_count: number
   out_of_stock_count: number
-  sales_trend: SalesTrendPoint[]
+  contact_counts: ContactCounts
   category_breakdown: CategoryBreakdownEntry[]
   recent_orders: Order[]
 }

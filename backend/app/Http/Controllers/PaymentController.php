@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PaymentStoreRequest;
+use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\PaymentService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Mail;
 
 class PaymentController extends Controller
 {
@@ -36,6 +38,8 @@ class PaymentController extends Controller
             ]);
 
             $order->update(['status' => 'paid']);
+
+            Mail::to($order->user->email)->send(new OrderConfirmationMail($order->load('orderItems')));
 
             return response()->json(['status' => 'succeeded', 'order_id' => $order->id], 200);
         }

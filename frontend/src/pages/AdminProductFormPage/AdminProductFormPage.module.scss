@@ -32,3 +32,10 @@
   border: 1px solid $color-border;
   margin-bottom: $space-2;
 }
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: 0.9rem;
+}

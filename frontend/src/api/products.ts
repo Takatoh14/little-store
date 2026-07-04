@@ -20,6 +20,13 @@ export async function getAdminProducts(params: { category_id?: number; page?: nu
   return res.data
 }
 
+// GET /admin/products/{id} は response()->json(new ProductResource(...)) のためflat
+// (公開側のgetProductは非公開商品で404になるため、管理画面の編集フォームはこちらを使う)
+export async function getAdminProduct(id: number): Promise<Product> {
+  const res = await client.get<Product>(`/admin/products/${id}`)
+  return res.data
+}
+
 // POST /admin/products は response()->json(new ProductResource(...), 201) のためflat
 export async function createAdminProduct(formData: FormData): Promise<Product> {
   const res = await client.post<Product>('/admin/products', formData)

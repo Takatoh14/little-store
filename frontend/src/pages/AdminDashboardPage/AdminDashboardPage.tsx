@@ -1,17 +1,47 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getDashboard } from '../../api/dashboard'
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { getDashboard, getSalesTrend } from '../../api/dashboard'
 import { ErrorMessage, LoadingMessage } from '../../components/StatusMessage/StatusMessage'
 import { STATUS_LABELS } from '../../constants/orderStatus'
 import { useAsync } from '../../hooks/useAsync'
+import type { SalesTrendGranularity } from '../../types/salesTrend'
 import styles from './AdminDashboardPage.module.scss'
 
-function formatMonth(month: string): string {
-  const [, monthPart] = month.split('-')
-  return `${Number(monthPart)}月`
+const GRANULARITY_LABELS: Record<SalesTrendGranularity, string> = {
+  hour: '時間帯',
+  week: '週',
+  month: '月',
+  year: '年',
 }
+
+const GRANULARITIES: SalesTrendGranularity[] = ['hour', 'week', 'month', 'year']
+
+// 「合計」を含め、系列ごとに固定の色を割り当てる（カテゴリ数が増えても循環させる）
+const LINE_COLORS = ['#c0392b', '#2f221c', '#7a6f62', '#2e7d32', '#8e44ad', '#2980b9', '#d35400']
 
 export function AdminDashboardPage() {
   const { data: dashboard, isLoading, error } = useAsync(() => getDashboard(), [])
+
+  const [granularity, setGranularity] = useState<SalesTrendGranularity>('month')
+  const { data: salesTrend, isLoading: isTrendLoading } = useAsync(() => getSalesTrend(granularity), [granularity])
+
+  const chartData = salesTrend?.periods.map((period, index) => {
+    const row: Record<string, string | number> = { period }
+    for (const series of salesTrend.series) {
+      row[series.name] = series.totals[index]
+    }
+    return row
+  })
 
   return (
     <section className={styles.section}>
@@ -41,30 +71,51 @@ export function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className={styles.panels}>
-            <div className={styles.panel}>
-              <h2 className={styles.panelTitle}>売上推移（直近6か月）</h2>
-              {dashboard.sales_trend.every((point) => point.total === 0) ? (
-                <p className={styles.emptyText}>データがありません</p>
-              ) : (
-                <div className={styles.chart}>
-                  {(() => {
-                    const max = Math.max(...dashboard.sales_trend.map((point) => point.total), 1)
-                    return dashboard.sales_trend.map((point) => (
-                      <div key={point.month} className={styles.bar}>
-                        <span className={styles.barValue}>¥{point.total.toLocaleString('ja-JP')}</span>
-                        <div
-                          className={styles.barFill}
-                          style={{ height: `${Math.max((point.total / max) * 100, 2)}%` }}
-                        />
-                        <span className={styles.barLabel}>{formatMonth(point.month)}</span>
-                      </div>
-                    ))
-                  })()}
-                </div>
-              )}
+          <div className={styles.panel}>
+            <div className={styles.trendHeader}>
+              <h2 className={styles.panelTitle}>売上推移</h2>
+              <div className={styles.granularityTabs}>
+                {GRANULARITIES.map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    className={`${styles.granularityTab} ${g === granularity ? styles.granularityTabActive : ''}`}
+                    onClick={() => setGranularity(g)}
+                  >
+                    {GRANULARITY_LABELS[g]}
+                  </button>
+                ))}
+              </div>
             </div>
 
+            {isTrendLoading && <LoadingMessage />}
+
+            {chartData && (
+              <div className={styles.chartWrapper}>
+                <ResponsiveContainer width="100%" height={320}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="period" fontSize={12} />
+                    <YAxis fontSize={12} tickFormatter={(value: number) => `¥${value.toLocaleString('ja-JP')}`} />
+                    <Tooltip formatter={(value) => `¥${Number(value).toLocaleString('ja-JP')}`} />
+                    <Legend />
+                    {salesTrend?.series.map((series, index) => (
+                      <Line
+                        key={series.name}
+                        type="monotone"
+                        dataKey={series.name}
+                        stroke={LINE_COLORS[index % LINE_COLORS.length]}
+                        strokeWidth={series.name === '合計' ? 3 : 1.5}
+                        dot={false}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.panels}>
             <div className={styles.panel}>
               <h2 className={styles.panelTitle}>カテゴリ別売上比率</h2>
               {dashboard.category_breakdown.length === 0 ? (
@@ -90,6 +141,24 @@ export function AdminDashboardPage() {
                   })()}
                 </div>
               )}
+            </div>
+
+            <div className={styles.panel}>
+              <h2 className={styles.panelTitle}>問い合わせ状況</h2>
+              <div className={styles.contactCounts}>
+                <Link to="/admin/contacts?status=unread" className={styles.contactCountRow}>
+                  <span>未読</span>
+                  <span className={styles.contactCountValue}>{dashboard.contact_counts.unread}件</span>
+                </Link>
+                <Link to="/admin/contacts?status=read" className={styles.contactCountRow}>
+                  <span>既読</span>
+                  <span className={styles.contactCountValue}>{dashboard.contact_counts.read}件</span>
+                </Link>
+                <Link to="/admin/contacts?status=answered" className={styles.contactCountRow}>
+                  <span>回答済み</span>
+                  <span className={styles.contactCountValue}>{dashboard.contact_counts.answered}件</span>
+                </Link>
+              </div>
             </div>
           </div>
 

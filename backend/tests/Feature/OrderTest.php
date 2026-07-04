@@ -120,4 +120,109 @@ class OrderTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    public function test_complete_succeeds_for_shipped_order(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'shipped']);
+
+        $response = $this->actingAs($user)->postJson('/api/orders/'.$order->id.'/complete');
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'completed']);
+    }
+
+    public function test_complete_fails_for_non_shipped_order(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'paid']);
+
+        $response = $this->actingAs($user)->postJson('/api/orders/'.$order->id.'/complete');
+
+        $response->assertStatus(422);
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'paid']);
+    }
+
+    public function test_complete_fails_for_other_users_order(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $otherUser->id, 'status' => 'shipped']);
+
+        $response = $this->actingAs($user)->postJson('/api/orders/'.$order->id.'/complete');
+
+        $response->assertStatus(404);
+    }
+
+    public function test_complete_requires_authentication(): void
+    {
+        $order = Order::factory()->create(['status' => 'shipped']);
+
+        $this->postJson('/api/orders/'.$order->id.'/complete')->assertStatus(401);
+    }
+
+    public function test_request_cancel_succeeds_for_pending_order(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'pending']);
+
+        $response = $this->actingAs($user)->postJson('/api/orders/'.$order->id.'/cancel-request');
+
+        $response->assertStatus(200);
+        $this->assertNotNull($order->refresh()->cancel_requested_at);
+    }
+
+    public function test_request_cancel_succeeds_for_paid_order(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'paid']);
+
+        $response = $this->actingAs($user)->postJson('/api/orders/'.$order->id.'/cancel-request');
+
+        $response->assertStatus(200);
+        $this->assertNotNull($order->refresh()->cancel_requested_at);
+    }
+
+    public function test_request_cancel_fails_for_shipped_order(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'shipped']);
+
+        $response = $this->actingAs($user)->postJson('/api/orders/'.$order->id.'/cancel-request');
+
+        $response->assertStatus(422);
+        $this->assertNull($order->refresh()->cancel_requested_at);
+    }
+
+    public function test_request_cancel_fails_when_already_requested(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create([
+            'user_id' => $user->id,
+            'status' => 'paid',
+            'cancel_requested_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->postJson('/api/orders/'.$order->id.'/cancel-request');
+
+        $response->assertStatus(422);
+    }
+
+    public function test_request_cancel_fails_for_other_users_order(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $otherUser->id, 'status' => 'pending']);
+
+        $response = $this->actingAs($user)->postJson('/api/orders/'.$order->id.'/cancel-request');
+
+        $response->assertStatus(404);
+    }
+
+    public function test_request_cancel_requires_authentication(): void
+    {
+        $order = Order::factory()->create(['status' => 'pending']);
+
+        $this->postJson('/api/orders/'.$order->id.'/cancel-request')->assertStatus(401);
+    }
 }

@@ -1,4 +1,4 @@
-export type OrderStatus = 'pending' | 'paid' | 'shipped' | 'completed'
+export type OrderStatus = 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'
 
 export interface OrderItem {
   id: number
@@ -12,6 +12,7 @@ export interface OrderItem {
 export interface Order {
   id: number
   status: OrderStatus
+  cancel_requested_at: string | null
   total_price: number
   shipping_address: string
   phone: string

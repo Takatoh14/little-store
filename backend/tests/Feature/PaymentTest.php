@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class PaymentTest extends TestCase
@@ -13,6 +15,7 @@ class PaymentTest extends TestCase
 
     public function test_store_succeeds_and_marks_order_paid(): void
     {
+        Mail::fake();
         $user = User::factory()->create();
         $order = Order::factory()->create([
             'user_id' => $user->id,
@@ -28,10 +31,12 @@ class PaymentTest extends TestCase
         $response->assertJson(['status' => 'succeeded', 'order_id' => $order->id]);
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'paid']);
         $this->assertDatabaseHas('payments', ['order_id' => $order->id, 'status' => 'succeeded']);
+        Mail::assertSent(OrderConfirmationMail::class, fn ($mail) => $mail->hasTo($user->email));
     }
 
     public function test_store_fails_when_card_declined(): void
     {
+        Mail::fake();
         $user = User::factory()->create();
         $order = Order::factory()->create([
             'user_id' => $user->id,
@@ -46,5 +51,6 @@ class PaymentTest extends TestCase
         $response->assertStatus(402);
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'pending']);
         $this->assertDatabaseHas('payments', ['order_id' => $order->id, 'status' => 'failed']);
+        Mail::assertNothingSent();
     }
 }

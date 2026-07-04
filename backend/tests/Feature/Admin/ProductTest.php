@@ -30,12 +30,14 @@ class ProductTest extends TestCase
             'stock' => 20,
             'description' => '説明文',
             'image' => UploadedFile::fake()->image('product.jpg'),
+            'is_published' => true,
         ]);
 
         $response->assertStatus(201);
         $this->assertDatabaseHas('products', [
             'name' => 'テスト商品',
             'category_id' => $category->id,
+            'is_published' => true,
         ]);
     }
 
@@ -52,6 +54,7 @@ class ProductTest extends TestCase
             'price' => 1500,
             'stock' => 20,
             'image' => UploadedFile::fake()->image('product.jpg'),
+            'is_published' => true,
         ]);
 
         $response->assertStatus(403);
@@ -84,6 +87,40 @@ class ProductTest extends TestCase
         $response->assertJsonCount(3, 'data');
     }
 
+    public function test_admin_can_view_unpublished_product_detail(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $product = Product::factory()->create(['is_published' => false]);
+
+        $response = $this->actingAs($admin)->getJson('/api/admin/products/'.$product->id);
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('id', $product->id);
+        $response->assertJsonPath('is_published', false);
+    }
+
+    public function test_non_admin_cannot_view_admin_product_detail(): void
+    {
+        $customer = User::factory()->create();
+        $product = Product::factory()->create();
+
+        $response = $this->actingAs($customer)->getJson('/api/admin/products/'.$product->id);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_admin_list_includes_unpublished_products(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Product::factory()->create(['is_published' => true]);
+        Product::factory()->create(['is_published' => false]);
+
+        $response = $this->actingAs($admin)->getJson('/api/admin/products');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(2, 'data');
+    }
+
     public function test_non_admin_cannot_list_products(): void
     {
         $customer = User::factory()->create();
@@ -108,10 +145,30 @@ class ProductTest extends TestCase
             'category_id' => $category->id,
             'price' => 2000,
             'stock' => 10,
+            'is_published' => true,
         ]);
 
         $response->assertStatus(200);
         $this->assertDatabaseHas('products', ['id' => $product->id, 'name' => '新商品名']);
+    }
+
+    public function test_admin_can_unpublish_product_on_update(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $category = Category::factory()->create();
+        $product = Product::factory()->create(['is_published' => true]);
+
+        $response = $this->actingAs($admin)->post('/api/admin/products/'.$product->id, [
+            '_method' => 'PUT',
+            'name' => $product->name,
+            'category_id' => $category->id,
+            'price' => $product->price,
+            'stock' => $product->stock,
+            'is_published' => false,
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('products', ['id' => $product->id, 'is_published' => false]);
     }
 
     public function test_updating_product_without_image_keeps_existing_image_url(): void
@@ -128,6 +185,7 @@ class ProductTest extends TestCase
             'category_id' => $category->id,
             'price' => 2000,
             'stock' => 10,
+            'is_published' => true,
         ]);
 
         $response->assertStatus(200);

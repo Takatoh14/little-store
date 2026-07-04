@@ -29,6 +29,7 @@ class ProductStoreRequest extends FormRequest
             'stock' => ['required', 'integer', 'min:0'],
             'description' => ['nullable', 'string', 'max:1000'],
             'image' => ['required', 'image', 'max:5120'],
+            'is_published' => ['required', 'boolean'],
         ];
     }
 }

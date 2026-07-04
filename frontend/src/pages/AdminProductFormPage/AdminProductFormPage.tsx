@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getCategories } from '../../api/categories'
 import { extractFieldErrors, extractMessage } from '../../api/errors'
-import { createAdminProduct, getProduct, updateAdminProduct } from '../../api/products'
+import { createAdminProduct, getAdminProduct, updateAdminProduct } from '../../api/products'
 import { Button } from '../../components/Button/Button'
 import { useAsync } from '../../hooks/useAsync'
 import type { Category } from '../../types/product'
@@ -38,7 +38,7 @@ export function AdminProductFormPage() {
 
   const { data: categories } = useAsync(() => getCategories(), [])
   const { data: product } = useAsync(
-    () => (isEditMode ? getProduct(Number(id)) : Promise.resolve(null)),
+    () => (isEditMode ? getAdminProduct(Number(id)) : Promise.resolve(null)),
     [id, isEditMode],
   )
 
@@ -49,6 +49,7 @@ export function AdminProductFormPage() {
   const [description, setDescription] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [isPublished, setIsPublished] = useState(true)
 
   useEffect(() => {
     if (!product) return
@@ -60,6 +61,7 @@ export function AdminProductFormPage() {
     setStock(String(product.stock))
     setDescription(product.description ?? '')
     setPreviewUrl(product.image_url)
+    setIsPublished(product.is_published)
   }, [product])
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
@@ -88,6 +90,7 @@ export function AdminProductFormPage() {
     formData.append('price', price)
     formData.append('stock', stock)
     formData.append('description', description)
+    formData.append('is_published', isPublished ? '1' : '0')
     if (imageFile) formData.append('image', imageFile)
 
     setIsSubmitting(true)
@@ -166,6 +169,13 @@ export function AdminProductFormPage() {
             onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
           />
           {fieldErrors.image && <span className={styles.fieldError}>{fieldErrors.image}</span>}
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.checkboxLabel}>
+            <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} />
+            公開する
+          </label>
         </div>
 
         <Button type="submit" disabled={isSubmitting}>

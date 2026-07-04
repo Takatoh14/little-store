@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
+use App\Models\Category;
+use App\Models\Contact;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
@@ -32,18 +35,11 @@ class DashboardController extends Controller
 
         $outOfStockCount = Product::where('stock', 0)->count();
 
-        $salesTrend = collect(range(5, 0))->map(function (int $monthsAgo) use ($now) {
-            $monthDate = $now->copy()->subMonths($monthsAgo);
-            $total = Order::whereIn('status', self::PAID_STATUSES)
-                ->whereYear('created_at', $monthDate->year)
-                ->whereMonth('created_at', $monthDate->month)
-                ->sum('total_price');
-
-            return [
-                'month' => $monthDate->format('Y-m'),
-                'total' => (int) $total,
-            ];
-        })->values();
+        $contactCounts = [
+            'unread' => Contact::where('status', 'unread')->count(),
+            'read' => Contact::where('status', 'read')->count(),
+            'answered' => Contact::where('status', 'answered')->count(),
+        ];
 
         $categoryBreakdown = OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
@@ -66,9 +62,96 @@ class DashboardController extends Controller
             'monthly_order_count' => $monthlyOrderCount,
             'member_count' => $memberCount,
             'out_of_stock_count' => $outOfStockCount,
-            'sales_trend' => $salesTrend,
+            'contact_counts' => $contactCounts,
             'category_breakdown' => $categoryBreakdown,
             'recent_orders' => OrderResource::collection($recentOrders),
         ]);
+    }
+
+    public function salesTrend(Request $request): JsonResponse
+    {
+        $granularity = $request->string('granularity', 'month')->value();
+
+        if (! in_array($granularity, ['hour', 'week', 'month', 'year'], true)) {
+            abort(422, '不正な期間指定です');
+        }
+
+        $periods = $this->buildPeriods($granularity);
+
+        $rows = OrderItem::query()
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->join('products', 'products.id', '=', 'order_items.product_id')
+            ->join('categories', 'categories.id', '=', 'products.category_id')
+            ->whereIn('orders.status', self::PAID_STATUSES)
+            ->where('orders.created_at', '>=', $periods[0]['start'])
+            ->select('orders.created_at', 'categories.name as category_name')
+            ->selectRaw('order_items.price * order_items.quantity as line_total')
+            ->get();
+
+        $categoryNames = Category::pluck('name');
+
+        $seriesTotals = ['合計' => array_fill(0, count($periods), 0)];
+        foreach ($categoryNames as $categoryName) {
+            $seriesTotals[$categoryName] = array_fill(0, count($periods), 0);
+        }
+
+        foreach ($rows as $row) {
+            $createdAt = Carbon::parse($row->created_at);
+            $periodIndex = null;
+
+            foreach ($periods as $index => $period) {
+                if ($createdAt->gte($period['start']) && $createdAt->lt($period['end'])) {
+                    $periodIndex = $index;
+                    break;
+                }
+            }
+
+            if ($periodIndex === null) {
+                continue;
+            }
+
+            $seriesTotals['合計'][$periodIndex] += (int) $row->line_total;
+            $seriesTotals[$row->category_name][$periodIndex] += (int) $row->line_total;
+        }
+
+        return response()->json([
+            'granularity' => $granularity,
+            'periods' => array_map(fn ($period) => $period['label'], $periods),
+            'series' => collect($seriesTotals)->map(fn ($totals, $name) => [
+                'name' => $name,
+                'totals' => $totals,
+            ])->values(),
+        ]);
+    }
+
+    /**
+     * @return array<int, array{start: Carbon, end: Carbon, label: string}>
+     */
+    private function buildPeriods(string $granularity): array
+    {
+        $now = Carbon::now();
+
+        return match ($granularity) {
+            'hour' => collect(range(23, 0))->map(function (int $hoursAgo) use ($now) {
+                $start = $now->copy()->startOfHour()->subHours($hoursAgo);
+
+                return ['start' => $start, 'end' => $start->copy()->addHour(), 'label' => $start->format('H時')];
+            })->values()->all(),
+            'week' => collect(range(7, 0))->map(function (int $weeksAgo) use ($now) {
+                $start = $now->copy()->startOfWeek()->subWeeks($weeksAgo);
+
+                return ['start' => $start, 'end' => $start->copy()->addWeek(), 'label' => $start->format('n/j').'週'];
+            })->values()->all(),
+            'year' => collect(range(4, 0))->map(function (int $yearsAgo) use ($now) {
+                $start = $now->copy()->startOfYear()->subYears($yearsAgo);
+
+                return ['start' => $start, 'end' => $start->copy()->addYear(), 'label' => $start->format('Y年')];
+            })->values()->all(),
+            default => collect(range(5, 0))->map(function (int $monthsAgo) use ($now) {
+                $start = $now->copy()->startOfMonth()->subMonths($monthsAgo);
+
+                return ['start' => $start, 'end' => $start->copy()->addMonthNoOverflow(), 'label' => $start->format('n月')];
+            })->values()->all(),
+        };
     }
 }

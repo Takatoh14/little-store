@@ -50,4 +50,22 @@ class ProductTest extends TestCase
     {
         $this->getJson('/api/products/999999')->assertStatus(404);
     }
+
+    public function test_index_excludes_unpublished_products(): void
+    {
+        Product::factory()->create(['is_published' => true]);
+        Product::factory()->create(['is_published' => false]);
+
+        $response = $this->getJson('/api/products');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+    }
+
+    public function test_show_returns_404_for_unpublished_product(): void
+    {
+        $product = Product::factory()->create(['is_published' => false]);
+
+        $this->getJson('/api/products/'.$product->id)->assertStatus(404);
+    }
 }

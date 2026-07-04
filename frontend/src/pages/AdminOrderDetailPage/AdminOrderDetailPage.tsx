@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { extractMessage } from '../../api/errors'
-import { getAdminOrder, updateAdminOrderStatus } from '../../api/orders'
+import { approveCancelOrder, getAdminOrder, rejectCancelOrder, updateAdminOrderStatus } from '../../api/orders'
 import { Button } from '../../components/Button/Button'
 import { ErrorMessage, LoadingMessage } from '../../components/StatusMessage/StatusMessage'
 import { STATUS_LABELS, STATUS_SEQUENCE } from '../../constants/orderStatus'
@@ -41,6 +41,32 @@ export function AdminOrderDetailPage() {
     }
   }
 
+  const handleApproveCancel = async () => {
+    if (!order) return
+    setBanner(null)
+    setIsAdvancing(true)
+    try {
+      setOrder(await approveCancelOrder(order.id))
+    } catch (err) {
+      setBanner(extractMessage(err))
+    } finally {
+      setIsAdvancing(false)
+    }
+  }
+
+  const handleRejectCancel = async () => {
+    if (!order) return
+    setBanner(null)
+    setIsAdvancing(true)
+    try {
+      setOrder(await rejectCancelOrder(order.id))
+    } catch (err) {
+      setBanner(extractMessage(err))
+    } finally {
+      setIsAdvancing(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <section className={styles.section}>
@@ -57,7 +83,13 @@ export function AdminOrderDetailPage() {
     )
   }
 
-  const nextStatus = STATUS_SEQUENCE[STATUS_SEQUENCE.indexOf(order.status) + 1]
+  // completed/cancelledは終端ステータスのため次のステータスを持たない
+  // (indexOfが-1を返すcancelledをガードしないとSTATUS_SEQUENCE[0]='pending'が
+  //  誤って「次のステータス」として算出されてしまう)
+  const nextStatus =
+    order.status === 'completed' || order.status === 'cancelled'
+      ? undefined
+      : STATUS_SEQUENCE[STATUS_SEQUENCE.indexOf(order.status) + 1]
 
   return (
     <section className={styles.section}>
@@ -65,12 +97,22 @@ export function AdminOrderDetailPage() {
 
       {banner && <p className={styles.banner}>{banner}</p>}
 
-      {nextStatus ? (
+      {order.cancel_requested_at ? (
+        <div className={styles.cancelActions}>
+          <p className={styles.cancelRequestedBadge}>キャンセル申請中です</p>
+          <Button disabled={isAdvancing} onClick={handleApproveCancel}>
+            キャンセルを承認する
+          </Button>
+          <Button variant="secondary" disabled={isAdvancing} onClick={handleRejectCancel}>
+            キャンセルを却下する
+          </Button>
+        </div>
+      ) : nextStatus ? (
         <Button className={styles.advanceButton} disabled={isAdvancing} onClick={() => handleAdvance(nextStatus)}>
           {STATUS_LABELS[nextStatus]}にする
         </Button>
       ) : (
-        <span className={styles.completedBadge}>完了</span>
+        <span className={styles.completedBadge}>{STATUS_LABELS[order.status]}</span>
       )}
 
       <div className={styles.detail}>

@@ -96,4 +96,38 @@ class OrderController extends Controller
 
         return response()->json(new OrderResource($order->load('orderItems')), 201);
     }
+
+    public function complete(Request $request, Order $order): JsonResponse
+    {
+        if ($order->user_id !== $request->user()->id) {
+            abort(404);
+        }
+
+        if ($order->status !== 'shipped') {
+            return response()->json(['message' => 'この注文は受け取り済みにできません'], 422);
+        }
+
+        $order->update(['status' => 'completed']);
+
+        return response()->json(new OrderResource($order->load('orderItems')));
+    }
+
+    public function requestCancel(Request $request, Order $order): JsonResponse
+    {
+        if ($order->user_id !== $request->user()->id) {
+            abort(404);
+        }
+
+        if (! in_array($order->status, ['pending', 'paid'], true)) {
+            return response()->json(['message' => 'この注文はキャンセル申請できません'], 422);
+        }
+
+        if ($order->cancel_requested_at !== null) {
+            return response()->json(['message' => '既にキャンセル申請済みです'], 422);
+        }
+
+        $order->update(['cancel_requested_at' => now()]);
+
+        return response()->json(new OrderResource($order->load('orderItems')));
+    }
 }

@@ -36,6 +36,25 @@
   margin: $space-3 0 $space-2;
 }
 
+.actionButton {
+  max-width: 260px;
+  margin-bottom: $space-4;
+}
+
+.cancelRequestedBadge {
+  display: inline-block;
+  padding: $space-2 $space-4;
+  border-radius: 999px;
+  background: $color-text-muted;
+  color: #fff;
+  font-size: 0.85rem;
+  margin-bottom: $space-4;
+}
+
+.banner {
+  @include banner-error;
+}
+
 .backLink {
   display: inline-block;
 }

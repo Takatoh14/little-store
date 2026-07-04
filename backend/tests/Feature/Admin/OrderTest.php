@@ -105,4 +105,95 @@ class OrderTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_admin_can_filter_orders_by_status(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Order::factory()->create(['status' => 'pending']);
+        Order::factory()->create(['status' => 'paid']);
+
+        $response = $this->actingAs($admin)->getJson('/api/admin/orders?status=paid');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.status', 'paid');
+    }
+
+    public function test_admin_can_filter_orders_by_cancel_request(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Order::factory()->create(['status' => 'pending']);
+        Order::factory()->create(['status' => 'pending', 'cancel_requested_at' => now()]);
+
+        $response = $this->actingAs($admin)->getJson('/api/admin/orders?has_cancel_request=1');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+    }
+
+    public function test_admin_can_approve_cancel_request(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $order = Order::factory()->create(['status' => 'paid', 'cancel_requested_at' => now()]);
+
+        $response = $this->actingAs($admin)->postJson('/api/admin/orders/'.$order->id.'/approve-cancel');
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'cancelled']);
+    }
+
+    public function test_admin_can_reject_cancel_request(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $order = Order::factory()->create(['status' => 'paid', 'cancel_requested_at' => now()]);
+
+        $response = $this->actingAs($admin)->postJson('/api/admin/orders/'.$order->id.'/reject-cancel');
+
+        $response->assertStatus(200);
+        $order->refresh();
+        $this->assertNull($order->cancel_requested_at);
+        $this->assertSame('paid', $order->status);
+    }
+
+    public function test_approve_cancel_fails_when_no_request_exists(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $order = Order::factory()->create(['status' => 'paid']);
+
+        $response = $this->actingAs($admin)->postJson('/api/admin/orders/'.$order->id.'/approve-cancel');
+
+        $response->assertStatus(422);
+    }
+
+    public function test_reject_cancel_fails_when_no_request_exists(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $order = Order::factory()->create(['status' => 'paid']);
+
+        $response = $this->actingAs($admin)->postJson('/api/admin/orders/'.$order->id.'/reject-cancel');
+
+        $response->assertStatus(422);
+    }
+
+    public function test_non_admin_cannot_approve_or_reject_cancel(): void
+    {
+        $customer = User::factory()->create();
+        $order = Order::factory()->create(['status' => 'paid', 'cancel_requested_at' => now()]);
+
+        $this->actingAs($customer)->postJson('/api/admin/orders/'.$order->id.'/approve-cancel')->assertStatus(403);
+        $this->actingAs($customer)->postJson('/api/admin/orders/'.$order->id.'/reject-cancel')->assertStatus(403);
+    }
+
+    public function test_admin_cannot_advance_status_while_cancel_requested(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $order = Order::factory()->create(['status' => 'pending', 'cancel_requested_at' => now()]);
+
+        $response = $this->actingAs($admin)->putJson('/api/admin/orders/'.$order->id, [
+            'status' => 'paid',
+        ]);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'pending']);
+    }
 }

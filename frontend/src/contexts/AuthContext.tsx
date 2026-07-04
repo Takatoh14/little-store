@@ -6,7 +6,7 @@ import type { User } from '../types/user'
 interface AuthContextValue {
   user: User | null
   token: string | null
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<User>
   register: (name: string, email: string, password: string, passwordConfirmation: string) => Promise<void>
   logout: () => Promise<void>
 }
@@ -34,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStoredAuth({ token: res.token, user: res.user })
     setUser(res.user)
     setToken(res.token)
+    return res.user
   }, [])
 
   // /register はトークンを返さないため、登録直後にloginを内部的に呼んでサインイン状態にする

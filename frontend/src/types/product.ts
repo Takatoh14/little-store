@@ -10,5 +10,6 @@ export interface Product {
   price: number
   stock: number
   image_url: string | null
+  is_published: boolean
   category: Category
 }

@@ -5,6 +5,8 @@ import { RequireAuth } from './components/RequireAuth/RequireAuth'
 import { Layout } from './components/Layout/Layout'
 import { AuthProvider } from './contexts/AuthContext'
 import { CartProvider } from './contexts/CartContext'
+import { AdminContactDetailPage } from './pages/AdminContactDetailPage/AdminContactDetailPage'
+import { AdminContactListPage } from './pages/AdminContactListPage/AdminContactListPage'
 import { AdminDashboardPage } from './pages/AdminDashboardPage/AdminDashboardPage'
 import { AdminOrderDetailPage } from './pages/AdminOrderDetailPage/AdminOrderDetailPage'
 import { AdminOrderListPage } from './pages/AdminOrderListPage/AdminOrderListPage'
@@ -13,6 +15,7 @@ import { AdminProductListPage } from './pages/AdminProductListPage/AdminProductL
 import { CartPage } from './pages/CartPage/CartPage'
 import { CheckoutPage } from './pages/CheckoutPage/CheckoutPage'
 import { ContactPage } from './pages/ContactPage/ContactPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage/ForgotPasswordPage'
 import { LoginPage } from './pages/LoginPage/LoginPage'
 import { MyPage } from './pages/MyPage/MyPage'
 import { OrderCompletePage } from './pages/OrderCompletePage/OrderCompletePage'
@@ -22,6 +25,7 @@ import { PaymentPage } from './pages/PaymentPage/PaymentPage'
 import { ProductDetailPage } from './pages/ProductDetailPage/ProductDetailPage'
 import { ProductListPage } from './pages/ProductListPage/ProductListPage'
 import { RegisterPage } from './pages/RegisterPage/RegisterPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage/ResetPasswordPage'
 import { TopPage } from './pages/TopPage/TopPage'
 
 function App() {
@@ -39,6 +43,8 @@ function App() {
               <Route element={<RedirectIfAuthed />}>
                 <Route path="register" element={<RegisterPage />} />
                 <Route path="login" element={<LoginPage />} />
+                <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="reset-password" element={<ResetPasswordPage />} />
               </Route>
 
               <Route element={<RequireAuth />}>
@@ -58,6 +64,8 @@ function App() {
                   <Route path="admin/products/:id/edit" element={<AdminProductFormPage />} />
                   <Route path="admin/orders" element={<AdminOrderListPage />} />
                   <Route path="admin/orders/:id" element={<AdminOrderDetailPage />} />
+                  <Route path="admin/contacts" element={<AdminContactListPage />} />
+                  <Route path="admin/contacts/:id" element={<AdminContactDetailPage />} />
                 </Route>
               </Route>
             </Route>

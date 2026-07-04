@@ -33,3 +33,17 @@ export async function updatePassword(payload: {
 }): Promise<void> {
   await client.put('/password', payload)
 }
+
+export async function forgotPassword(payload: { email: string }): Promise<{ message: string }> {
+  const res = await client.post<{ message: string }>('/forgot-password', payload)
+  return res.data
+}
+
+export async function resetPassword(payload: {
+  email: string
+  token: string
+  password: string
+  password_confirmation: string
+}): Promise<void> {
+  await client.post('/reset-password', payload)
+}

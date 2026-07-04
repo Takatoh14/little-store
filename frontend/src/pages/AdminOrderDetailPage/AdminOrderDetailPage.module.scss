@@ -51,6 +51,23 @@
   margin-bottom: $space-4;
 }
 
+.cancelActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $space-3;
+  margin-bottom: $space-4;
+}
+
+.cancelRequestedBadge {
+  display: inline-block;
+  padding: $space-2 $space-4;
+  border-radius: 999px;
+  background: $color-danger;
+  color: #fff;
+  font-size: 0.85rem;
+}
+
 .banner {
   @include banner-error;
 }

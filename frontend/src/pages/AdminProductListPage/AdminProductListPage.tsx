@@ -83,7 +83,10 @@ export function AdminProductListPage() {
                   <div className={styles.thumbPlaceholder}>画像なし</div>
                 )}
                 <div className={styles.info}>
-                  <p className={styles.name}>{product.name}</p>
+                  <p className={styles.name}>
+                    {product.name}
+                    {!product.is_published && <span className={styles.unpublishedBadge}>非公開</span>}
+                  </p>
                   <p className={styles.meta}>
                     {product.category.name}・¥{product.price.toLocaleString('ja-JP')}・在庫{product.stock}
                   </p>

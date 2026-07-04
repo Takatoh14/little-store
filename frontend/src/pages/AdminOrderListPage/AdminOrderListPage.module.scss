@@ -10,6 +10,27 @@
   margin-bottom: $space-5;
 }
 
+.filters {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+  margin-bottom: $space-5;
+
+  select {
+    padding: $space-2 $space-3;
+    border: 1px solid $color-border;
+    border-radius: $radius-input;
+    font-size: 0.9rem;
+  }
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: 0.9rem;
+}
+
 .list {
   display: flex;
   flex-direction: column;

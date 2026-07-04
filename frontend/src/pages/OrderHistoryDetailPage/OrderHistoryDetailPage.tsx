@@ -1,18 +1,58 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getOrder } from '../../api/orders'
+import { extractMessage } from '../../api/errors'
+import { completeOrder, getOrder, requestCancelOrder } from '../../api/orders'
+import { Button } from '../../components/Button/Button'
 import { ErrorMessage, LoadingMessage } from '../../components/StatusMessage/StatusMessage'
 import { STATUS_LABELS } from '../../constants/orderStatus'
 import { useAsync } from '../../hooks/useAsync'
+import type { Order } from '../../types/order'
 import styles from './OrderHistoryDetailPage.module.scss'
 
 export function OrderHistoryDetailPage() {
   const { id } = useParams<{ id: string }>()
   const {
-    data: order,
+    data: fetchedOrder,
     isLoading,
     error,
     errorStatus,
   } = useAsync(() => getOrder(Number(id)), [id])
+
+  const [order, setOrder] = useState<Order | null>(null)
+  const [banner, setBanner] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (fetchedOrder) setOrder(fetchedOrder)
+  }, [fetchedOrder])
+
+  const handleComplete = async () => {
+    if (!order) return
+    setBanner(null)
+    setIsSubmitting(true)
+    try {
+      setOrder(await completeOrder(order.id))
+    } catch (err) {
+      setBanner(extractMessage(err))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleRequestCancel = async () => {
+    if (!order) return
+    if (!window.confirm('この注文のキャンセルを申請しますか？')) return
+    setBanner(null)
+    setIsSubmitting(true)
+    try {
+      setOrder(await requestCancelOrder(order.id))
+    } catch (err) {
+      setBanner(extractMessage(err))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -33,6 +73,23 @@ export function OrderHistoryDetailPage() {
   return (
     <section className={styles.section}>
       <h1 className={styles.title}>注文詳細 #{order.id}</h1>
+
+      {banner && <p className={styles.banner}>{banner}</p>}
+
+      {order.status === 'shipped' && (
+        <Button className={styles.actionButton} disabled={isSubmitting} onClick={handleComplete}>
+          受け取り済にする
+        </Button>
+      )}
+
+      {(order.status === 'pending' || order.status === 'paid') &&
+        (order.cancel_requested_at ? (
+          <p className={styles.cancelRequestedBadge}>キャンセル申請中です</p>
+        ) : (
+          <Button className={styles.actionButton} disabled={isSubmitting} onClick={handleRequestCancel}>
+            キャンセルを申請する
+          </Button>
+        ))}
 
       <div className={styles.detail}>
         <div className={styles.detailRow}>
