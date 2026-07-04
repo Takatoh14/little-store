@@ -101,4 +101,60 @@ class AuthTest extends TestCase
     {
         $this->postJson('/api/logout')->assertStatus(401);
     }
+
+    public function test_update_password_succeeds_with_correct_current_password(): void
+    {
+        $user = User::factory()->create(['password' => 'old-password']);
+
+        $response = $this->actingAs($user)->putJson('/api/password', [
+            'current_password' => 'old-password',
+            'password' => 'new-password123',
+            'password_confirmation' => 'new-password123',
+        ]);
+
+        $response->assertStatus(204);
+
+        $loginResponse = $this->postJson('/api/login', [
+            'email' => $user->email,
+            'password' => 'new-password123',
+        ]);
+        $loginResponse->assertStatus(200);
+    }
+
+    public function test_update_password_fails_with_wrong_current_password(): void
+    {
+        $user = User::factory()->create(['password' => 'old-password']);
+
+        $response = $this->actingAs($user)->putJson('/api/password', [
+            'current_password' => 'wrong-password',
+            'password' => 'new-password123',
+            'password_confirmation' => 'new-password123',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors('current_password');
+    }
+
+    public function test_update_password_fails_when_confirmation_mismatches(): void
+    {
+        $user = User::factory()->create(['password' => 'old-password']);
+
+        $response = $this->actingAs($user)->putJson('/api/password', [
+            'current_password' => 'old-password',
+            'password' => 'new-password123',
+            'password_confirmation' => 'different-password',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors('password');
+    }
+
+    public function test_update_password_requires_authentication(): void
+    {
+        $this->putJson('/api/password', [
+            'current_password' => 'old-password',
+            'password' => 'new-password123',
+            'password_confirmation' => 'new-password123',
+        ])->assertStatus(401);
+    }
 }

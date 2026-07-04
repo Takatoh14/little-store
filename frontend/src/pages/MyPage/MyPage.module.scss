@@ -33,3 +33,31 @@
 .label {
   color: $color-text-muted;
 }
+
+.subtitle {
+  font-size: 1.1rem;
+  margin-top: $space-6;
+  margin-bottom: $space-4;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.field {
+  @include form-field;
+}
+
+.banner {
+  @include banner-error;
+}
+
+.success {
+  padding: $space-3 $space-4;
+  border-radius: $radius-input;
+  background: rgba($color-success, 0.1);
+  color: $color-success;
+  font-size: 0.9rem;
+  margin-bottom: $space-4;
+}

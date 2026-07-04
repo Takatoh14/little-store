@@ -25,3 +25,11 @@ export async function fetchCurrentUser(): Promise<User> {
   const res = await client.get<User>('/user')
   return res.data
 }
+
+export async function updatePassword(payload: {
+  current_password: string
+  password: string
+  password_confirmation: string
+}): Promise<void> {
+  await client.put('/password', payload)
+}
