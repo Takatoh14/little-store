@@ -16,7 +16,8 @@ class OrderController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        $orders = Order::with('user')
+        // 退会済み(ソフトデリート済み)の顧客の注文も、管理画面では引き続き氏名/メールを表示する
+        $orders = Order::with(['user' => fn ($query) => $query->withTrashed()])
             ->when($request->status, fn ($query, $status) => $query->where('status', $status))
             ->when($request->boolean('has_cancel_request'), fn ($query) => $query->whereNotNull('cancel_requested_at'))
             ->latest()
@@ -27,7 +28,7 @@ class OrderController extends Controller
 
     public function show(Order $order): JsonResponse
     {
-        return response()->json(new OrderResource($order->load(['orderItems', 'user'])));
+        return response()->json(new OrderResource($order->load(['orderItems', 'user' => fn ($query) => $query->withTrashed()])));
     }
 
     public function update(OrderUpdateRequest $request, Order $order): JsonResponse
@@ -45,7 +46,7 @@ class OrderController extends Controller
 
         $order->update(['status' => $request->status]);
 
-        return response()->json(new OrderResource($order->load(['orderItems', 'user'])));
+        return response()->json(new OrderResource($order->load(['orderItems', 'user' => fn ($query) => $query->withTrashed()])));
     }
 
     public function approveCancel(Order $order): JsonResponse
@@ -56,7 +57,7 @@ class OrderController extends Controller
 
         $order->update(['status' => 'cancelled']);
 
-        return response()->json(new OrderResource($order->load(['orderItems', 'user'])));
+        return response()->json(new OrderResource($order->load(['orderItems', 'user' => fn ($query) => $query->withTrashed()])));
     }
 
     public function rejectCancel(Order $order): JsonResponse
@@ -67,6 +68,6 @@ class OrderController extends Controller
 
         $order->update(['cancel_requested_at' => null]);
 
-        return response()->json(new OrderResource($order->load(['orderItems', 'user'])));
+        return response()->json(new OrderResource($order->load(['orderItems', 'user' => fn ($query) => $query->withTrashed()])));
     }
 }

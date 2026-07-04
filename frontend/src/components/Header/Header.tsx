@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useCart } from '../../hooks/useCart'
@@ -7,21 +8,38 @@ export function Header() {
   const { user, logout } = useAuth()
   const { totalCount } = useCart()
   const navigate = useNavigate()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  const closeMenu = () => setIsMenuOpen(false)
 
   const handleLogout = async () => {
     await logout()
+    closeMenu()
     navigate('/')
   }
 
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        <Link to="/" className={styles.logo}>
+        <Link to="/" className={styles.logo} onClick={closeMenu}>
           Little Store
         </Link>
-        <nav className={styles.nav}>
+
+        <button
+          type="button"
+          className={styles.hamburger}
+          aria-label="メニューを開閉する"
+          aria-expanded={isMenuOpen}
+          onClick={() => setIsMenuOpen((open) => !open)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+
+        <nav className={`${styles.nav} ${isMenuOpen ? styles.navOpen : ''}`} onClick={closeMenu}>
           <Link to="/products">商品一覧</Link>
-          <Link to="/contact">お問い合わせ</Link>
+          <Link to={user?.role === 'admin' ? '/admin/contacts' : '/contact'}>お問い合わせ</Link>
           {user ? (
             <>
               {user.role === 'admin' && (
@@ -29,7 +47,6 @@ export function Header() {
                   <Link to="/admin/dashboard">ダッシュボード</Link>
                   <Link to="/admin/products">商品管理</Link>
                   <Link to="/admin/orders">注文管理</Link>
-                  <Link to="/admin/contacts">問い合わせ管理</Link>
                 </>
               )}
               <Link to="/mypage">マイページ</Link>

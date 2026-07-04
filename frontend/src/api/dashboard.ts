@@ -9,7 +9,13 @@ export async function getDashboard(): Promise<DashboardSummary> {
 }
 
 // GET /admin/dashboard/sales-trend は response()->json([...]) のためflat
-export async function getSalesTrend(granularity: SalesTrendGranularity): Promise<SalesTrend> {
-  const res = await client.get<SalesTrend>('/admin/dashboard/sales-trend', { params: { granularity } })
+export async function getSalesTrend(params: {
+  granularity: SalesTrendGranularity
+  date?: string
+  year?: number
+  start_year?: number
+  end_year?: number
+}): Promise<SalesTrend> {
+  const res = await client.get<SalesTrend>('/admin/dashboard/sales-trend', { params })
   return res.data
 }

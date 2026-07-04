@@ -95,4 +95,18 @@ class AuthController extends Controller
 
         return response()->json(null, 204);
     }
+
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->isAdmin()) {
+            return response()->json(['message' => '管理者アカウントは退会できません'], 403);
+        }
+
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json(null, 204);
+    }
 }

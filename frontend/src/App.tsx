@@ -21,6 +21,7 @@ import { MyPage } from './pages/MyPage/MyPage'
 import { OrderCompletePage } from './pages/OrderCompletePage/OrderCompletePage'
 import { OrderHistoryDetailPage } from './pages/OrderHistoryDetailPage/OrderHistoryDetailPage'
 import { OrderHistoryPage } from './pages/OrderHistoryPage/OrderHistoryPage'
+import { PasswordChangePage } from './pages/PasswordChangePage/PasswordChangePage'
 import { PaymentPage } from './pages/PaymentPage/PaymentPage'
 import { ProductDetailPage } from './pages/ProductDetailPage/ProductDetailPage'
 import { ProductListPage } from './pages/ProductListPage/ProductListPage'
@@ -54,6 +55,7 @@ function App() {
                 <Route path="orders/:id/complete" element={<OrderCompletePage />} />
 
                 <Route path="mypage" element={<MyPage />} />
+                <Route path="mypage/password" element={<PasswordChangePage />} />
                 <Route path="orders" element={<OrderHistoryPage />} />
                 <Route path="orders/:id" element={<OrderHistoryDetailPage />} />
 

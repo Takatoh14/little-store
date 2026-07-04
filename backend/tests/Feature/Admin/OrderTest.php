@@ -23,6 +23,19 @@ class OrderTest extends TestCase
         $response->assertJsonPath('data.0.user.email', $customer->email);
     }
 
+    public function test_admin_can_still_see_withdrawn_customer_name_on_order_detail(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $customer = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $customer->id]);
+        $customer->delete();
+
+        $response = $this->actingAs($admin)->getJson('/api/admin/orders/'.$order->id);
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('user.email', $customer->email);
+    }
+
     public function test_non_admin_cannot_list_orders(): void
     {
         $customer = User::factory()->create();

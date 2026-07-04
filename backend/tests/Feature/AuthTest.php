@@ -157,4 +157,53 @@ class AuthTest extends TestCase
             'password_confirmation' => 'new-password123',
         ])->assertStatus(401);
     }
+
+    public function test_customer_can_delete_account(): void
+    {
+        $user = User::factory()->create(['email' => 'taro@example.com', 'password' => 'password123']);
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)->deleteJson('/api/account');
+
+        $response->assertStatus(204);
+        $this->assertSoftDeleted('users', ['id' => $user->id]);
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+
+        $loginResponse = $this->postJson('/api/login', [
+            'email' => 'taro@example.com',
+            'password' => 'password123',
+        ]);
+        $loginResponse->assertStatus(401);
+    }
+
+    public function test_admin_cannot_delete_account(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->deleteJson('/api/account');
+
+        $response->assertStatus(403);
+        $this->assertDatabaseHas('users', ['id' => $admin->id, 'deleted_at' => null]);
+    }
+
+    public function test_delete_account_requires_authentication(): void
+    {
+        $this->deleteJson('/api/account')->assertStatus(401);
+    }
+
+    public function test_deleted_account_email_can_be_reregistered(): void
+    {
+        $user = User::factory()->create(['email' => 'taro@example.com']);
+        $user->delete();
+
+        $response = $this->postJson('/api/register', [
+            'name' => 'Taro Yamada',
+            'email' => 'taro@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseCount('users', 2);
+    }
 }

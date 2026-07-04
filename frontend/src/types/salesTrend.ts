@@ -9,4 +9,8 @@ export interface SalesTrend {
   granularity: SalesTrendGranularity
   periods: string[]
   series: SalesTrendSeries[]
+  date?: string
+  year?: number
+  start_year?: number
+  end_year?: number
 }

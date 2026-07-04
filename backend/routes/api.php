@@ -30,6 +30,7 @@ Route::post('/contact', [ContactController::class, 'store']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::put('/password', [AuthController::class, 'updatePassword']);
+    Route::delete('/account', [AuthController::class, 'deleteAccount']);
 
     Route::get('/cart', [CartController::class, 'index']);
     Route::post('/cart', [CartController::class, 'store']);

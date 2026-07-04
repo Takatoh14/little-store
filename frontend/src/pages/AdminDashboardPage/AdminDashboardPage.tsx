@@ -26,18 +26,50 @@ const GRANULARITY_LABELS: Record<SalesTrendGranularity, string> = {
 
 const GRANULARITIES: SalesTrendGranularity[] = ['hour', 'week', 'month', 'year']
 
-// 「合計」を含め、系列ごとに固定の色を割り当てる（カテゴリ数が増えても循環させる）
-const LINE_COLORS = ['#c0392b', '#2f221c', '#7a6f62', '#2e7d32', '#8e44ad', '#2980b9', '#d35400']
+type ChartMode = 'total' | 'category'
+
+// 「合計」を除くカテゴリ系列ごとに固定の色を割り当てる（カテゴリ数が増えても循環させる）
+const LINE_COLORS = ['#2f221c', '#7a6f62', '#2e7d32', '#8e44ad', '#2980b9', '#d35400']
+const TOTAL_COLOR = '#c0392b'
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+const CURRENT_YEAR = new Date().getFullYear()
 
 export function AdminDashboardPage() {
   const { data: dashboard, isLoading, error } = useAsync(() => getDashboard(), [])
 
   const [granularity, setGranularity] = useState<SalesTrendGranularity>('month')
-  const { data: salesTrend, isLoading: isTrendLoading } = useAsync(() => getSalesTrend(granularity), [granularity])
+  const [chartMode, setChartMode] = useState<ChartMode>('total')
+
+  const [hourDate, setHourDate] = useState(today())
+  const [weekDate, setWeekDate] = useState(today())
+  const [monthYear, setMonthYear] = useState(CURRENT_YEAR)
+  const [yearStart, setYearStart] = useState(CURRENT_YEAR - 4)
+  const [yearEnd, setYearEnd] = useState(CURRENT_YEAR)
+
+  const { data: salesTrend, isLoading: isTrendLoading } = useAsync(() => {
+    switch (granularity) {
+      case 'hour':
+        return getSalesTrend({ granularity, date: hourDate })
+      case 'week':
+        return getSalesTrend({ granularity, date: weekDate })
+      case 'month':
+        return getSalesTrend({ granularity, year: monthYear })
+      default:
+        return getSalesTrend({ granularity, start_year: yearStart, end_year: yearEnd })
+    }
+  }, [granularity, hourDate, weekDate, monthYear, yearStart, yearEnd])
+
+  const visibleSeries = salesTrend?.series.filter((series) =>
+    chartMode === 'total' ? series.name === '合計' : series.name !== '合計',
+  )
 
   const chartData = salesTrend?.periods.map((period, index) => {
     const row: Record<string, string | number> = { period }
-    for (const series of salesTrend.series) {
+    for (const series of visibleSeries ?? []) {
       row[series.name] = series.totals[index]
     }
     return row
@@ -88,6 +120,59 @@ export function AdminDashboardPage() {
               </div>
             </div>
 
+            <div className={styles.trendControls}>
+              <div className={styles.chartModeTabs}>
+                <button
+                  type="button"
+                  className={`${styles.chartModeTab} ${chartMode === 'total' ? styles.chartModeTabActive : ''}`}
+                  onClick={() => setChartMode('total')}
+                >
+                  合計
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.chartModeTab} ${chartMode === 'category' ? styles.chartModeTabActive : ''}`}
+                  onClick={() => setChartMode('category')}
+                >
+                  カテゴリ別
+                </button>
+              </div>
+
+              <div className={styles.periodInput}>
+                {(granularity === 'hour' || granularity === 'week') && (
+                  <input
+                    type="date"
+                    value={granularity === 'hour' ? hourDate : weekDate}
+                    onChange={(e) =>
+                      granularity === 'hour' ? setHourDate(e.target.value) : setWeekDate(e.target.value)
+                    }
+                  />
+                )}
+                {granularity === 'month' && (
+                  <label>
+                    年:{' '}
+                    <input
+                      type="number"
+                      value={monthYear}
+                      onChange={(e) => setMonthYear(Number(e.target.value))}
+                    />
+                  </label>
+                )}
+                {granularity === 'year' && (
+                  <>
+                    <label>
+                      開始年:{' '}
+                      <input type="number" value={yearStart} onChange={(e) => setYearStart(Number(e.target.value))} />
+                    </label>
+                    <label>
+                      終了年:{' '}
+                      <input type="number" value={yearEnd} onChange={(e) => setYearEnd(Number(e.target.value))} />
+                    </label>
+                  </>
+                )}
+              </div>
+            </div>
+
             {isTrendLoading && <LoadingMessage />}
 
             {chartData && (
@@ -99,12 +184,12 @@ export function AdminDashboardPage() {
                     <YAxis fontSize={12} tickFormatter={(value: number) => `¥${value.toLocaleString('ja-JP')}`} />
                     <Tooltip formatter={(value) => `¥${Number(value).toLocaleString('ja-JP')}`} />
                     <Legend />
-                    {salesTrend?.series.map((series, index) => (
+                    {visibleSeries?.map((series, index) => (
                       <Line
                         key={series.name}
                         type="monotone"
                         dataKey={series.name}
-                        stroke={LINE_COLORS[index % LINE_COLORS.length]}
+                        stroke={series.name === '合計' ? TOTAL_COLOR : LINE_COLORS[index % LINE_COLORS.length]}
                         strokeWidth={series.name === '合計' ? 3 : 1.5}
                         dot={false}
                       />

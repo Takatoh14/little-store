@@ -47,3 +47,7 @@ export async function resetPassword(payload: {
 }): Promise<void> {
   await client.post('/reset-password', payload)
 }
+
+export async function deleteAccount(): Promise<void> {
+  await client.delete('/account')
+}

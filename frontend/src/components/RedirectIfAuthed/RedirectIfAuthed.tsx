@@ -10,7 +10,7 @@ export function RedirectIfAuthed() {
   // 再レンダリングと競合し「/」への強制遷移が勝ってしまう(admin以外の宛先が無視される)。
   // 遷移先の決定はこのガード側に一本化する。
   if (user) {
-    return <Navigate to={redirectParam ?? (user.role === 'admin' ? '/admin/dashboard' : '/')} replace />
+    return <Navigate to={redirectParam ?? (user.role === 'admin' ? '/admin/dashboard' : '/products')} replace />
   }
 
   return <Outlet />

@@ -4,6 +4,7 @@
 .header {
   background: $color-header-bg;
   border-bottom: 1px solid $color-border;
+  position: relative;
 }
 
 .inner {
@@ -25,11 +26,51 @@
   }
 }
 
-.nav {
+.hamburger {
+  @include button-reset;
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 28px;
+  height: 28px;
+
+  span {
+    display: block;
+    height: 2px;
+    background: $color-ink;
+    border-radius: 2px;
+  }
+
+  @include pc {
+    display: none;
+  }
+}
+
+.nav {
+  display: none;
   align-items: center;
   gap: $space-4;
   font-size: 0.9rem;
+
+  @include pc {
+    display: flex;
+  }
+}
+
+.navOpen {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $space-4;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  padding: $space-4;
+  background: $color-header-bg;
+  border-bottom: 1px solid $color-border;
+  z-index: 10;
 }
 
 .cartLink {

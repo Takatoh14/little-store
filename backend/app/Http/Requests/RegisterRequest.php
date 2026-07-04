@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RegisterRequest extends FormRequest
 {
@@ -24,7 +25,8 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:50'],
-            'email' => ['required', 'email', 'unique:users'],
+            // 退会済み(deleted_atがセットされた)アカウントのメールアドレスは再登録可能にする
+            'email' => ['required', 'email', Rule::unique('users', 'email')->whereNull('deleted_at')],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
     }

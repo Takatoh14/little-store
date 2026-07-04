@@ -100,6 +100,54 @@
   color: #fff;
 }
 
+.trendControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  margin-bottom: $space-4;
+}
+
+.chartModeTabs {
+  display: flex;
+  gap: $space-2;
+}
+
+.chartModeTab {
+  @include button-reset;
+  padding: $space-1 $space-3;
+  border: 1px solid $color-border;
+  border-radius: $radius-input;
+  font-size: 0.8rem;
+  color: $color-text-muted;
+}
+
+.chartModeTabActive {
+  background: $color-accent;
+  border-color: $color-accent;
+  color: #fff;
+}
+
+.periodInput {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $space-3;
+  font-size: 0.85rem;
+
+  input {
+    padding: $space-1 $space-2;
+    border: 1px solid $color-border;
+    border-radius: $radius-input;
+    font-size: 0.85rem;
+  }
+
+  input[type='number'] {
+    width: 80px;
+  }
+}
+
 .chartWrapper {
   width: 100%;
 }

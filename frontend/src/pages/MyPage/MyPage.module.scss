@@ -34,30 +34,27 @@
   color: $color-text-muted;
 }
 
+.linkRow {
+  margin-top: $space-3;
+}
+
 .subtitle {
   font-size: 1.1rem;
-  margin-top: $space-6;
-  margin-bottom: $space-4;
+  margin-bottom: $space-3;
 }
 
-.form {
-  display: flex;
-  flex-direction: column;
+.dangerZone {
+  margin-top: $space-7;
+  padding-top: $space-5;
+  border-top: 1px solid $color-border;
 }
 
-.field {
-  @include form-field;
+.dangerText {
+  font-size: 0.85rem;
+  color: $color-text-muted;
+  margin-bottom: $space-3;
 }
 
 .banner {
   @include banner-error;
-}
-
-.success {
-  padding: $space-3 $space-4;
-  border-radius: $radius-input;
-  background: rgba($color-success, 0.1);
-  color: $color-success;
-  font-size: 0.9rem;
-  margin-bottom: $space-4;
 }
