@@ -81,6 +81,7 @@ docker compose exec backend php artisan migrate --seed
 | `MAIL_MAILER` | デフォルトは`log`（`storage/logs/laravel.log`に出力されるだけで実送信されません）。実際にメールを送るには`smtp`等に変更しSMTP系の値を設定してください |
 | `MAIL_ADMIN_ADDRESS` | お問い合わせフォーム送信時の通知先メールアドレス |
 | `FRONTEND_URL` | パスワード再設定メールに載せるリンクの生成に使うフロントエンドのURL（デフォルト`http://localhost:5173`） |
+| `SANCTUM_TOKEN_EXPIRATION` | ログイン後のAPIトークン有効期限（分）。デフォルト`120`（＝ログインから2時間で自動的にログアウト扱いになる）。`null`にすると無期限になる |
 
 `frontend/.env.example`の`VITE_STRIPE_KEY`は`backend/.env`の`STRIPE_KEY`と同じ鍵ペア（公開可能キー）を設定してください。
 
